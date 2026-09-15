@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import { waitUntil } from 'base44:runtime';
 import { buildSystemPrompt } from '../../shared/aureliusPrompt.ts';
 
 // Aurelius central brain. Takes a user command, retrieves relevant memory,
@@ -225,6 +226,11 @@ export default async function(req: Request): Promise<Response> {
         messages: [turn, assistantTurn],
         last_message_at: new Date().toISOString()
       });
+    }
+
+    // --- If this is a lead search, kick off lead discovery in the background ---
+    if (plan.intent === 'lead_search') {
+      waitUntil(base44.functions.invoke('lead_discovery', { message }).catch(() => {}));
     }
 
     return Response.json({

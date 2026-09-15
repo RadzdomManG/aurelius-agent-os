@@ -1,0 +1,80 @@
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
+import LeadComposer from '@/components/leads/LeadComposer';
+import LeadPipeline from '@/components/leads/LeadPipeline';
+import LeadTable from '@/components/leads/LeadTable';
+import LeadDetailDrawer from '@/components/leads/LeadDetailDrawer';
+import { KanbanSquare, Table2, Loader2 } from 'lucide-react';
+
+export default function Leads() {
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState(() => localStorage.getItem('aurelius_leads_view') || 'pipeline');
+  const [openLead, setOpenLead] = useState(null);
+  const [selected, setSelected] = useState([]);
+  const pollRef = useRef(null);
+
+  const load = useCallback(async () => {
+    try {
+      const l = await base44.entities.Lead.list('-created_date', 300);
+      setLeads(l);
+    } catch { /* noop */ }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => {
+    load();
+    pollRef.current = setInterval(load, 10000);
+    return () => clearInterval(pollRef.current);
+  }, [load]);
+
+  const setViewP = (v) => { setView(v); localStorage.setItem('aurelius_leads_view', v); };
+
+  const moveLead = async (id, status) => {
+    setLeads((ls) => ls.map((l) => (l.id === id ? { ...l, status } : l)));
+    try { await base44.entities.Lead.update(id, { status }); } catch { load(); }
+  };
+
+  const bulkStatus = async (status) => {
+    await Promise.all(selected.map((id) => base44.entities.Lead.update(id, { status }).catch(() => {})));
+    setSelected([]);
+    load();
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 space-y-5">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="font-display text-xl font-semibold text-stone-800">Leads</h1>
+          <p className="text-[13px] text-stone-400">{leads.length} prospects · scored & deduped by Aurelius</p>
+        </div>
+        <div className="inline-flex rounded-xl border border-stone-200 bg-white p-0.5">
+          <button onClick={() => setViewP('pipeline')}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] transition-colors ${view === 'pipeline' ? 'bg-stone-900 text-white' : 'text-stone-500'}`}>
+            <KanbanSquare className="w-3.5 h-3.5" /> Pipeline
+          </button>
+          <button onClick={() => setViewP('table')}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] transition-colors ${view === 'table' ? 'bg-stone-900 text-white' : 'text-stone-500'}`}>
+            <Table2 className="w-3.5 h-3.5" /> Table
+          </button>
+        </div>
+      </div>
+
+      <LeadComposer onDone={load} />
+
+      {loading ? (
+        <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-stone-300" /></div>
+      ) : leads.length === 0 ? (
+        <div className="text-center py-20 text-stone-400 text-sm">
+          No leads yet. Use the search above to have Aurelius find prospects for you.
+        </div>
+      ) : view === 'pipeline' ? (
+        <LeadPipeline leads={leads} onMove={moveLead} onOpen={setOpenLead} />
+      ) : (
+        <LeadTable leads={leads} onOpen={setOpenLead} onBulkStatus={bulkStatus} selected={selected} setSelected={setSelected} />
+      )}
+
+      <LeadDetailDrawer lead={openLead} onClose={() => setOpenLead(null)} onUpdated={(l) => { setLeads((ls) => ls.map((x) => (x.id === l.id ? l : x))); }} />
+    </div>
+  );
+}

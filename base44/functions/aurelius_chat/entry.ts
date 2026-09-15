@@ -17,13 +17,14 @@ export default async function(req: Request): Promise<Response> {
     if (!message) return Response.json({ error: 'Message is required' }, { status: 400 });
 
     // --- Load context in parallel ---
-    const [profiles, memories, activities, pendingApprovals, runningTasks, conversations] = await Promise.all([
+    const [profiles, memories, activities, pendingApprovals, runningTasks, conversations, leads] = await Promise.all([
       base44.entities.UserProfile.filter({ created_by_id: user.id }),
       base44.entities.AgentMemory.filter({ created_by_id: user.id }, '-importance', 25),
       base44.entities.Activity.filter({ created_by_id: user.id }, '-created_date', 8),
       base44.entities.Approval.filter({ created_by_id: user.id, status: 'pending' }),
       base44.entities.Task.filter({ created_by_id: user.id, status: { $in: ['running', 'pending'] } }, '-created_date', 8),
       conversationId ? base44.entities.Conversation.filter({ id: conversationId, created_by_id: user.id }) : Promise.resolve([]),
+      base44.entities.Lead.filter({ created_by_id: user.id }, '-lead_score', 30),
     ]);
 
     const profile: any = profiles[0] || {};
@@ -41,13 +42,14 @@ export default async function(req: Request): Promise<Response> {
     });
 
     // --- Reason with the LLM ---
+    const leadRoster = leads.map((l: any) => `- id:${l.id} | ${l.name}${l.company ? ` @ ${l.company}` : ''}${l.email ? ` <${l.email}>` : ''} (score ${l.lead_score || 0}, status ${l.status || 'new'})`).join('\n');
     const llmResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `${systemPrompt}\n\n=== USER COMMAND ===\n${message}\n\nProduce the JSON response now.`,
+      prompt: `${systemPrompt}\n\n=== USER COMMAND ===\n${message}\n\n=== LEADS (use the exact id when scheduling or referencing a lead) ===\n${leadRoster || '(no leads yet)'}\n\nWhen the user wants to book/schedule a discovery call, classify intent as "schedule_call", set action_type "calendar_change" on the task, and include in payload: lead_id (from the roster above), start (ISO 8601 datetime), duration_minutes, title, notes. Produce the JSON response now.`,
       response_json_schema: {
         type: 'object',
         properties: {
           reply: { type: 'string', description: 'Concise human-facing summary of what you understood and what you will do' },
-          intent: { type: 'string', description: 'Classified intent, e.g. lead_search, job_search, reply, follow_up, research, briefing, general' },
+          intent: { type: 'string', description: 'Classified intent, e.g. lead_search, job_search, schedule_call, reply, follow_up, research, briefing, general' },
           sub_agent: { type: 'string', description: 'Primary sub-agent that should own this work' },
           tasks: {
             type: 'array',
@@ -231,6 +233,28 @@ export default async function(req: Request): Promise<Response> {
     // --- If this is a lead search, kick off lead discovery in the background ---
     if (plan.intent === 'lead_search') {
       waitUntil(base44.functions.invoke('lead_discovery', { message }).catch(() => {}));
+    }
+
+    // --- If scheduling a discovery call, book it when autonomy allows ---
+    if (plan.intent === 'schedule_call') {
+      const scheduleTask = tasks.find((t: any) => t.action_type === 'calendar_change');
+      const p: any = scheduleTask?.payload || {};
+      const allow = !needsApproval('calendar_change');
+      if (allow && p.start) {
+        let leadId: string | undefined = p.lead_id;
+        if (!leadId && (p.lead_name || p.lead_email)) {
+          const match = leads.find((l: any) =>
+            (p.lead_email && l.email && l.email.toLowerCase() === String(p.lead_email).toLowerCase()) ||
+            (p.lead_name && l.name && l.name.toLowerCase().includes(String(p.lead_name).toLowerCase()))
+          );
+          leadId = match?.id;
+        }
+        if (leadId) {
+          waitUntil(base44.functions.invoke('book_discovery_call', {
+            lead_id: leadId, start: p.start, duration_minutes: p.duration_minutes, title: p.title, notes: p.notes
+          }).catch(() => {}));
+        }
+      }
     }
 
     return Response.json({

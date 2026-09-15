@@ -1,0 +1,44 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "social_profile": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "lead",
+        "client",
+        "prospect",
+        "partner",
+        "other"
+      ],
+      "default": "lead"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

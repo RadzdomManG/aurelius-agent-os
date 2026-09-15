@@ -1,0 +1,134 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "goal": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "running",
+        "waiting_for_approval",
+        "waiting_for_external",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "assigned_agent": {
+      "type": "string",
+      "default": "aurelius"
+    },
+    "sub_agent": {
+      "type": "string",
+      "description": "Specialized sub-agent delegated to"
+    },
+    "intent": {
+      "type": "string",
+      "description": "Classified intent of the task"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "running",
+              "done",
+              "failed"
+            ],
+            "default": "pending"
+          },
+          "agent": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tool_calls": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "action_type": {
+      "type": "string",
+      "description": "e.g. email_send, lead_search, job_search, research"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Planned action details shown in approval queue"
+    },
+    "result": {
+      "type": "string"
+    },
+    "error": {
+      "type": "string"
+    },
+    "retry_count": {
+      "type": "number",
+      "default": 0
+    },
+    "autonomy_mode": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "assisted",
+        "autonomous"
+      ],
+      "default": "manual"
+    },
+    "requires_approval": {
+      "type": "boolean",
+      "default": false
+    },
+    "related_contact_id": {
+      "type": "string"
+    },
+    "related_lead_id": {
+      "type": "string"
+    },
+    "related_job_id": {
+      "type": "string"
+    },
+    "conversation_id": {
+      "type": "string"
+    },
+    "audit_trail": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "title",
+    "goal"
+  ]
+}

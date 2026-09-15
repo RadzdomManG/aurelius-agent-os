@@ -1,0 +1,50 @@
+{
+  "name": "Conversation",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Rolling short summary of the conversation"
+    },
+    "autonomy_mode": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "assisted",
+        "autonomous"
+      ],
+      "default": "manual"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "ts": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "last_message_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

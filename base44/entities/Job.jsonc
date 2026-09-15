@@ -1,0 +1,78 @@
+{
+  "name": "Job",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "description": "Job board / source"
+    },
+    "location": {
+      "type": "string"
+    },
+    "remote": {
+      "type": "boolean",
+      "default": false
+    },
+    "salary": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "match_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100 match against profile"
+    },
+    "match_reason": {
+      "type": "string",
+      "description": "Why this job matches"
+    },
+    "skills_matched": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "saved",
+        "reviewing",
+        "apply",
+        "applied",
+        "interview",
+        "rejected",
+        "offer",
+        "ignore"
+      ],
+      "default": "saved"
+    },
+    "application_url": {
+      "type": "string",
+      "description": "Direct apply link when auto-apply not permitted"
+    },
+    "applied_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "duplicate_of": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

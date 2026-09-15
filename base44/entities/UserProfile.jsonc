@@ -1,0 +1,112 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "description": "Professional title / role"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "experience": {
+      "type": "string"
+    },
+    "portfolio_url": {
+      "type": "string"
+    },
+    "resume_url": {
+      "type": "string"
+    },
+    "ideal_clients": {
+      "type": "string",
+      "description": "Description of ideal client profiles"
+    },
+    "preferred_jobs": {
+      "type": "string",
+      "description": "Description of preferred job types"
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "working_hours": {
+      "type": "string"
+    },
+    "autonomy_mode": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "assisted",
+        "autonomous"
+      ],
+      "default": "manual"
+    },
+    "action_controls": {
+      "type": "object",
+      "description": "Per-action enable flags: email_send, follow_ups, job_submit, calendar_changes, crm_changes, browser_actions, notifications, data_collection",
+      "properties": {
+        "email_send": {
+          "type": "boolean",
+          "default": false
+        },
+        "follow_ups": {
+          "type": "boolean",
+          "default": true
+        },
+        "job_submit": {
+          "type": "boolean",
+          "default": false
+        },
+        "calendar_changes": {
+          "type": "boolean",
+          "default": false
+        },
+        "crm_changes": {
+          "type": "boolean",
+          "default": true
+        },
+        "browser_actions": {
+          "type": "boolean",
+          "default": false
+        },
+        "notifications": {
+          "type": "boolean",
+          "default": true
+        },
+        "data_collection": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "notification_preferences": {
+      "type": "object"
+    },
+    "llm_provider": {
+      "type": "string",
+      "default": "automatic"
+    },
+    "onboarded": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "full_name"
+  ]
+}

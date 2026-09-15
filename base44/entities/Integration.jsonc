@@ -1,0 +1,57 @@
+{
+  "name": "Integration",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Slug identifier e.g. gmail"
+    },
+    "label": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "description": "Category: email, calendar, storage, messaging, search, browser, llm, jobs, database"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "connected",
+        "not_connected",
+        "error",
+        "reconnect_required"
+      ],
+      "default": "not_connected"
+    },
+    "description": {
+      "type": "string"
+    },
+    "setup_instructions": {
+      "type": "string",
+      "description": "Plain-English steps to connect"
+    },
+    "required_credential": {
+      "type": "string",
+      "description": "What credential/setup is needed"
+    },
+    "connector_type": {
+      "type": "string",
+      "description": "Base44 connector integration_type if applicable"
+    },
+    "last_connected": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "label",
+    "type"
+  ]
+}

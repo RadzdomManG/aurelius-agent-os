@@ -1,0 +1,62 @@
+{
+  "name": "AgentMemory",
+  "type": "object",
+  "properties": {
+    "memory_type": {
+      "type": "string",
+      "enum": [
+        "person",
+        "company",
+        "lead",
+        "client",
+        "conversation",
+        "job",
+        "project",
+        "preference",
+        "writing_style",
+        "task",
+        "commitment",
+        "fact",
+        "event"
+      ],
+      "default": "fact"
+    },
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "related_type": {
+      "type": "string",
+      "description": "Entity type this memory relates to"
+    },
+    "related_id": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pinned": {
+      "type": "boolean",
+      "default": false
+    },
+    "importance": {
+      "type": "number",
+      "default": 5,
+      "description": "1-10 importance score"
+    },
+    "source": {
+      "type": "string",
+      "description": "Where this memory came from"
+    }
+  },
+  "required": [
+    "memory_type",
+    "title",
+    "content"
+  ]
+}

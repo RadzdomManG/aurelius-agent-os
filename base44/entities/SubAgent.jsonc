@@ -1,0 +1,39 @@
+{
+  "name": "SubAgent",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Slug identifier e.g. lead_agent"
+    },
+    "label": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "description": "What this agent specializes in"
+    },
+    "description": {
+      "type": "string"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "icon": {
+      "type": "string",
+      "description": "lucide icon name"
+    }
+  },
+  "required": [
+    "name",
+    "label",
+    "role"
+  ]
+}

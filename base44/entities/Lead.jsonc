@@ -1,0 +1,83 @@
+{
+  "name": "Lead",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "social_profile": {
+      "type": "string"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "lead_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100 quality score"
+    },
+    "score_reason": {
+      "type": "string",
+      "description": "Why this lead scored this way"
+    },
+    "reason_needed": {
+      "type": "string",
+      "description": "Why they may need the service"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "qualified",
+        "contacted",
+        "replied",
+        "interested",
+        "follow_up",
+        "meeting",
+        "won",
+        "lost",
+        "do_not_contact"
+      ],
+      "default": "new"
+    },
+    "next_action": {
+      "type": "string"
+    },
+    "last_contacted": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision_maker": {
+      "type": "boolean",
+      "default": false
+    },
+    "duplicate_of": {
+      "type": "string",
+      "description": "Id of the canonical lead if this is a duplicate"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -3,11 +3,17 @@ import { ChevronUp, ChevronDown, ExternalLink } from 'lucide-react';
 
 const COLUMNS = [
   { key: 'title', label: 'Title' },
-  { key: 'company', label: 'Company' },
-  { key: 'location', label: 'Location' },
+  { key: 'posted_at', label: 'Posted' },
   { key: 'status', label: 'Status' },
   { key: 'match_score', label: 'Match' },
 ];
+
+function formatPosted(value) {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: 'numeric', minute: '2-digit', hour12: true });
+}
 
 function scoreTone(s) {
   if (s >= 70) return 'bg-amber-100 text-amber-700';
@@ -18,7 +24,7 @@ function scoreTone(s) {
 const STATUSES = ['saved', 'reviewing', 'apply', 'applied', 'interview', 'rejected', 'offer', 'ignore'];
 
 export default function JobsTable({ jobs, onOpen }) {
-  const [sortKey, setSortKey] = useState('match_score');
+  const [sortKey, setSortKey] = useState('posted_at');
   const [sortDir, setSortDir] = useState('desc');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -89,8 +95,7 @@ export default function JobsTable({ jobs, onOpen }) {
             {filtered.map((j) => (
               <tr key={j.id} onClick={() => onOpen(j)} className="hover:bg-stone-50 cursor-pointer">
                 <td className="px-3 py-2 font-medium text-stone-800 max-w-[280px] truncate">{String(j.title || '').replace(/^\[(onlinejobsph|olj)\]\s*/i, '')}</td>
-                <td className="px-3 py-2 text-stone-500">{j.company || '—'}</td>
-                <td className="px-3 py-2 text-stone-500">{j.remote ? 'Remote' : (j.location || '—')}</td>
+                <td className="px-3 py-2 text-stone-500 tabular-nums">{formatPosted(j.posted_at || j.created_date)}</td>
                 <td className="px-3 py-2"><span className="capitalize text-stone-500">{(j.status || 'saved').replace(/_/g, ' ')}</span></td>
                 <td className="px-3 py-2"><span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(j.match_score)} tabular-nums`}>{j.match_score || 0}</span></td>
                 <td className="px-3 py-2 text-right">

@@ -63,6 +63,7 @@ export default function LeadComposer({ onDone }) {
       setToast({ ok: false, text: e.message || 'Discovery failed' });
     } finally {
       setBusy(false);
+      try { localStorage.removeItem('aurelius_lead_search_status'); } catch {}
     }
   };
 

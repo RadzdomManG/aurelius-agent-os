@@ -45,6 +45,7 @@ export default async function(req: Request): Promise<Response> {
         skills_matched: matched,
         status: 'saved',
         application_url: job.application_url || job.url,
+        owner_email: body.owner_email || 'Radzdomgallego4@gmail.com',
       });
       if (job.url) seenUrls.add(job.url);
       seenKeys.add(key);

@@ -13,6 +13,7 @@ export default function Jobs() {
   const [refreshing, setRefreshing] = useState(false);
   const [qualifiedOnly, setQualifiedOnly] = useState(false);
   const [keywordFilter, setKeywordFilter] = useState('');
+  const [secondsToScan, setSecondsToScan] = useState(30);
   const pollRef = useRef(null);
 
   const load = useCallback(async () => {
@@ -25,8 +26,10 @@ export default function Jobs() {
 
   useEffect(() => {
     load();
-    pollRef.current = setInterval(load, 30000);
-    return () => clearInterval(pollRef.current);
+    setSecondsToScan(30);
+    pollRef.current = setInterval(() => { load(); setSecondsToScan(30); }, 30000);
+    const tick = setInterval(() => setSecondsToScan((s) => Math.max(0, s - 1)), 1000);
+    return () => { clearInterval(pollRef.current); clearInterval(tick); };
   }, [load]);
 
   const setViewP = (v) => { setView(v); localStorage.setItem('aurelius_jobs_view', v); };
@@ -59,7 +62,7 @@ export default function Jobs() {
               <Radio className="w-3 h-3" /> Live
             </span>
           </h1>
-          <p className="text-[13px] text-stone-400">{newCount} jobs · auto-refreshing every 30s from your local OLJ watcher · owner: Radzdomgallego4@gmail.com</p>
+          <p className="text-[13px] text-stone-400">{newCount} jobs · OLJ watcher live · next scan in {secondsToScan}s · owner: Radzdomgallego4@gmail.com</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <input value={keywordFilter} onChange={(e) => setKeywordFilter(e.target.value)} placeholder="Filter keywords: AI content, ComfyUI, VA" className="w-64 rounded-xl border border-stone-200 bg-white px-3 py-1.5 text-[12.5px] focus:outline-none focus:border-amber-400" />

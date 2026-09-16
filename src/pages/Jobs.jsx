@@ -62,7 +62,7 @@ export default function Jobs() {
               <Radio className="w-3 h-3" /> Live
             </span>
           </h1>
-          <p className="text-[13px] text-stone-400">{newCount} jobs · OLJ watcher live · next scan in {secondsToScan}s · owner: Radzdomgallego4@gmail.com</p>
+          <p className="text-[13px] text-stone-400">{newCount} jobs · auto-refreshing every 30s · next scan in {secondsToScan}s · owner: Radzdomgallego4@gmail.com</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <input value={keywordFilter} onChange={(e) => setKeywordFilter(e.target.value)} placeholder="Filter keywords: AI content, ComfyUI, VA" className="w-64 rounded-xl border border-stone-200 bg-white px-3 py-1.5 text-[12.5px] focus:outline-none focus:border-amber-400" />

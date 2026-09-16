@@ -11,7 +11,7 @@ import { KanbanSquare, Table2, Loader2 } from 'lucide-react';
 export default function Leads() {
   const { mode, token } = usePortal();
   const isCustomer = mode === 'customer';
-  const showScore = !isCustomer;
+  const showScore = false;
   const leadApi = useLeadApi();
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +95,7 @@ export default function Leads() {
         </div>
       </div>
 
-      <LeadComposer onDone={() => { setHasSearched(true); setShowHistory(false); load(); }} />
+      <LeadComposer onDone={async (result) => { setHasSearched(true); setShowHistory(false); if (result?.ids?.length && !isCustomer) { const all = await base44.entities.Lead.list('-created_date', 300); setLeads(all.filter((x) => result.ids.includes(x.id))); } else if (!isCustomer) setLeads([]); }} />
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-stone-300" /></div>

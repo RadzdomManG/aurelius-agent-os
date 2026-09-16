@@ -25,11 +25,15 @@ export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSe
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [minScore, setMinScore] = useState(0);
+  const [contactFilter, setContactFilter] = useState('all');
 
   const filtered = useMemo(() => {
     let r = leads.filter((l) => {
       if (statusFilter !== 'all' && (l.status || 'new') !== statusFilter) return false;
       if ((l.lead_score || 0) < minScore) return false;
+      if (contactFilter === 'email' && !l.email) return false;
+      if (contactFilter === 'phone' && !l.phone) return false;
+      if (contactFilter === 'website' && !l.website) return false;
       if (search) {
         const q = search.toLowerCase();
         return [l.name, l.company, l.industry, l.location, l.email].some((f) => (f || '').toLowerCase().includes(q));
@@ -44,7 +48,7 @@ export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSe
       return 0;
     });
     return r;
-  }, [leads, search, statusFilter, minScore, sortKey, sortDir]);
+  }, [leads, search, statusFilter, minScore, contactFilter, sortKey, sortDir]);
 
   const toggleSort = (key) => {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -71,6 +75,7 @@ export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSe
           <option value="all">All statuses</option>
           {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
         </select>
+        <select value={contactFilter} onChange={(e) => setContactFilter(e.target.value)} className="rounded-lg border border-stone-200 px-2.5 py-1.5 text-[12.5px]"><option value="all">Any contact info</option><option value="email">With email</option><option value="phone">With phone</option><option value="website">With website</option></select>
         <label className="inline-flex items-center gap-1.5 text-[12px] text-stone-500">
           Min score
           <input type="range" min={0} max={100} step={10} value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="accent-amber-500" />

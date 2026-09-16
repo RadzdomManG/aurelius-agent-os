@@ -18,6 +18,7 @@ export default function LeadComposer({ onDone }) {
     const q = message.trim() || filters.keywords || filters.business;
     if (!q || busy) return;
     setBusy(true);
+    try { localStorage.setItem('aurelius_lead_search_status', JSON.stringify({ running: true, started_at: Date.now() })); } catch {}
     setToast(null);
     try {
       const d = await leadApi.searchLeads(q, filters, count);

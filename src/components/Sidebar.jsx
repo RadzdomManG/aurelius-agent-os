@@ -11,7 +11,7 @@ const nav = [
   { to: '/', label: 'Home', icon: LayoutDashboard },
   { to: '/aurelius', label: 'Aurelius', icon: Sparkles },
   { to: '/leads', label: 'Leads', icon: Users },
-  { to: '/jobs', label: 'Jobs', icon: Briefcase, soon: true },
+  { to: '/jobs', label: 'Jobs', icon: Briefcase },
   { to: '/inbox', label: 'Inbox', icon: Inbox, soon: true },
   { to: '/crm', label: 'CRM', icon: Contact, soon: true },
   { to: '/tasks', label: 'Tasks', icon: ListTodo, soon: true },

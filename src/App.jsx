@@ -17,6 +17,7 @@ import Aurelius from '@/pages/Aurelius';
 import Onboarding from '@/pages/Onboarding';
 import Settings from '@/pages/Settings';
 import Leads from '@/pages/Leads';
+import Jobs from '@/pages/Jobs';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -56,6 +57,7 @@ const AuthenticatedApp = () => {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/leads" element={<Leads />} />
+          <Route path="/jobs" element={<Jobs />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

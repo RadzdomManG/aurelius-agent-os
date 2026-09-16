@@ -97,7 +97,7 @@ export default function LeadComposer({ onDone }) {
       </div>
 
       {showFilters && (
-        <><div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        <><div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
           <FilterInput label="Business" value={filters.business} onChange={(v) => setFilters({ ...filters, business: v })} placeholder="Barbershop, car wash" />
           <FilterInput label="Location" value={filters.location} onChange={(v) => setFilters({ ...filters, location: v })} placeholder="California, United States" />
           <FilterInput label="Keywords" value={filters.keywords} onChange={(v) => setFilters({ ...filters, keywords: v })} placeholder="AI content" />

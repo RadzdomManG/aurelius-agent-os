@@ -26,7 +26,9 @@ export default function LeadComposer({ onDone }) {
         const email = String(row.email || row.Email || '');
         const phone = String(row.phone || row.Phone || row['Phone Number'] || '');
         const website = String(row.website || row.Website || '');
-        return (!filters.contact.includes('email') || !!email) && (!filters.contact.includes('phone') || !!phone) && (!filters.contact.includes('website') || !!website);
+        const required = filters.contact.filter((x) => x !== 'all');
+        const present = required.filter((x) => x === 'email' ? !!email : x === 'phone' ? !!phone : !!website);
+        return filters.match_mode === 'all' || !required.length || (filters.match_mode === 'near' ? present.length > 0 : present.length === required.length);
       };
       const eligibleAi = (d.leads || []).filter(contactMatches);
       let localCount = 0;

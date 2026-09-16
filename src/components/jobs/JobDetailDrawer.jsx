@@ -4,7 +4,7 @@ import { X, Globe, MapPin, ExternalLink, Save, Activity, Briefcase } from 'lucid
 
 const STATUSES = ['saved', 'reviewing', 'apply', 'applied', 'interview', 'rejected', 'offer', 'ignore'];
 
-export default function JobDetailDrawer({ job, onClose, onUpdated, readOnly }) {
+export default function JobDetailDrawer({ job, onClose, onUpdated, readOnly, showScore = true }) {
   const [edit, setEdit] = useState(null);
   const [activities, setActivities] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -61,10 +61,12 @@ export default function JobDetailDrawer({ job, onClose, onUpdated, readOnly }) {
 
         <div className="p-5 space-y-5">
           <div className="flex items-center gap-3">
-            <div className="flex flex-col items-center">
-              <span className={`text-2xl font-semibold tabular-nums ${job.match_score >= 70 ? 'text-amber-600' : job.match_score >= 40 ? 'text-stone-600' : 'text-stone-400'}`}>{job.match_score || 0}</span>
-              <span className="text-[10px] uppercase tracking-wider text-stone-400">match</span>
-            </div>
+            {showScore && (
+              <div className="flex flex-col items-center">
+                <span className={`text-2xl font-semibold tabular-nums ${job.match_score >= 70 ? 'text-amber-600' : job.match_score >= 40 ? 'text-stone-600' : 'text-stone-400'}`}>{job.match_score || 0}</span>
+                <span className="text-[10px] uppercase tracking-wider text-stone-400">match</span>
+              </div>
+            )}
             <div className="flex-1">
               {readOnly ? (
                 <span className="inline-block capitalize text-[12.5px] text-stone-600 bg-stone-100 px-2.5 py-1.5 rounded-lg">{(edit.status || 'saved').replace(/_/g, ' ')}</span>
@@ -77,7 +79,7 @@ export default function JobDetailDrawer({ job, onClose, onUpdated, readOnly }) {
             </div>
           </div>
 
-          {job.match_reason && <Field label="Why this match">{job.match_reason}</Field>}
+          {showScore && job.match_reason && <Field label="Why this match">{job.match_reason}</Field>}
 
           {job.skills_matched && job.skills_matched.length > 0 && (
             <div className="flex flex-wrap gap-1.5">

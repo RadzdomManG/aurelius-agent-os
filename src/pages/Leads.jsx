@@ -11,6 +11,7 @@ import { KanbanSquare, Table2, Loader2 } from 'lucide-react';
 export default function Leads() {
   const { mode, token } = usePortal();
   const isCustomer = mode === 'customer';
+  const showScore = !isCustomer;
   const leadApi = useLeadApi();
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +49,9 @@ export default function Leads() {
   };
 
   const exportCsv = () => {
-    const rows = leads.map((l) => [l.name, l.company, l.email, l.phone, l.website, l.location, l.lead_score, l.source]);
-    const csv = [['Name', 'Company', 'Email', 'Phone', 'Website', 'Location', 'Score', 'Source'], ...rows]
+    const headers = ['Name', 'Company', 'Owner', 'Email', 'Phone', 'Website', 'Location', 'Industry', 'Source'];
+    const rows = leads.map((l) => [l.name, l.company, l.owner_name, l.email, l.phone, l.website, l.location, l.industry, l.source]);
+    const csv = [headers, ...rows]
       .map((r) => r.map((v) => `"${String(v || '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -64,6 +66,8 @@ export default function Leads() {
     load();
   };
 
+  const showBoard = isCustomer || hasSearched || showHistory;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -72,11 +76,11 @@ export default function Leads() {
           <p className="text-[13px] text-stone-400">
             {leads.length > 0
               ? `${leads.length} prospects · scored by Aurelius`
-              : hasSearched ? 'No prospects found yet' : 'Run a search to load leads'}
+              : hasSearched ? 'No prospects found yet — try widening your location' : 'Run a search to load leads'}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowHistory((v) => !v)} className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-[12px] text-stone-600">{showHistory ? 'Current search' : 'Lead history'}</button>
+          <button onClick={() => setShowHistory((v) => !v)} className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-[12px] text-stone-600 hover:border-amber-300">{showHistory ? 'Current search' : 'Lead history'}</button>
           <button onClick={exportCsv} disabled={!leads.length} className="px-3 py-1.5 rounded-xl bg-stone-900 text-white text-[12px] disabled:opacity-40">Export CSV</button>
           <div className="inline-flex rounded-xl border border-stone-200 bg-white p-0.5">
             <button onClick={() => setViewP('pipeline')}
@@ -95,17 +99,17 @@ export default function Leads() {
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-stone-300" /></div>
-      ) : !isCustomer && !hasSearched && !showHistory ? (
-        <div className="text-center py-20 text-stone-400 text-sm">No leads loaded. Use the search above to find leads.</div>
+      ) : !showBoard ? (
+        <div className="text-center py-20 text-stone-400 text-sm">No leads loaded. Use the search above to find leads, or click Lead history to view previously discovered leads.</div>
       ) : leads.length === 0 ? (
         <div className="text-center py-20 text-stone-400 text-sm">No leads yet. Use the search above to have Aurelius find prospects for you.</div>
       ) : view === 'pipeline' ? (
-        <LeadPipeline leads={leads} onMove={moveLead} onOpen={setOpenLead} />
+        <LeadPipeline leads={leads} onMove={moveLead} onOpen={setOpenLead} showScore={showScore} />
       ) : (
-        <LeadTable leads={leads} onOpen={setOpenLead} onBulkStatus={bulkStatus} selected={selected} setSelected={setSelected} />
+        <LeadTable leads={leads} onOpen={setOpenLead} onBulkStatus={bulkStatus} selected={selected} setSelected={setSelected} showScore={showScore} />
       )}
 
-      <LeadDetailDrawer lead={openLead} onClose={() => setOpenLead(null)} onUpdated={(l) => { setLeads((ls) => ls.map((x) => (x.id === l.id ? l : x))); }} />
+      <LeadDetailDrawer lead={openLead} onClose={() => setOpenLead(null)} onUpdated={(l) => { setLeads((ls) => ls.map((x) => (x.id === l.id ? l : x))); }} showScore={showScore} />
     </div>
   );
 }

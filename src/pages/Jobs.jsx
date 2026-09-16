@@ -15,6 +15,7 @@ function jobTime(job) {
 export default function Jobs() {
   const { mode, token } = usePortal();
   const readOnly = mode === 'customer';
+  const showScore = !readOnly;
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState(() => localStorage.getItem('aurelius_jobs_view') || 'pipeline');
@@ -86,7 +87,7 @@ export default function Jobs() {
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh
           </button>
           <div className="inline-flex rounded-xl border border-stone-200 bg-white p-0.5">
-            <button onClick={() => setQualifiedOnly((v) => !v)} className={`px-3 py-1.5 rounded-lg text-[12.5px] ${qualifiedOnly ? "bg-amber-100 text-amber-800" : "text-stone-500"}`}>Qualified ({jobs.filter((j) => (j.match_score || 0) >= 70).length})</button>
+            {showScore && <button onClick={() => setQualifiedOnly((v) => !v)} className={`px-3 py-1.5 rounded-lg text-[12.5px] ${qualifiedOnly ? "bg-amber-100 text-amber-800" : "text-stone-500"}`}>Qualified ({jobs.filter((j) => (j.match_score || 0) >= 70).length})</button>}
             <button onClick={() => setViewP('pipeline')}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] transition-colors ${view === 'pipeline' ? 'bg-stone-900 text-white' : 'text-stone-500'}`}>
               <KanbanSquare className="w-3.5 h-3.5" /> Pipeline
@@ -106,12 +107,12 @@ export default function Jobs() {
           No jobs yet. Start your local watcher.py bot to stream OnlineJobs.ph posts here in real time.
         </div>
       ) : view === 'pipeline' ? (
-        <JobsPipeline jobs={displayedJobs} onMove={moveJob} onOpen={setOpenJob} readOnly={readOnly} />
+        <JobsPipeline jobs={displayedJobs} onMove={moveJob} onOpen={setOpenJob} readOnly={readOnly} showScore={showScore} />
       ) : (
-        <JobsTable jobs={displayedJobs} onOpen={setOpenJob} />
+        <JobsTable jobs={displayedJobs} onOpen={setOpenJob} showScore={showScore} />
       )}
 
-      <JobDetailDrawer job={openJob} onClose={() => setOpenJob(null)} readOnly={readOnly} onUpdated={(j) => setJobs((js) => js.map((x) => (x.id === j.id ? j : x)))} />
+      <JobDetailDrawer job={openJob} onClose={() => setOpenJob(null)} readOnly={readOnly} showScore={showScore} onUpdated={(j) => setJobs((js) => js.map((x) => (x.id === j.id ? j : x)))} />
     </div>
   );
 }

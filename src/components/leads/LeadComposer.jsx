@@ -27,7 +27,7 @@ export default function LeadComposer({ onDone }) {
       // it for customers (their browser can't reach localhost anyway).
       if (!leadApi.isCustomer) {
         try {
-          const local = await fetch('http://127.0.0.1:5000/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Access-Code': 'AGS-DEMO-2026' }, body: JSON.stringify({ keyword: q, location: filters.location || 'United States', limit: count }) });
+          const local = await fetch('http://127.0.0.1:5000/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Access-Code': 'AGS-DEMO-2026' }, body: JSON.stringify({ keyword: q, location: filters.location || 'United States', limit: count + 15 }) });
           if (local.ok) {
             const ld = await local.json();
             for (const row of (ld.leads || [])) {
@@ -38,7 +38,8 @@ export default function LeadComposer({ onDone }) {
               if (localCount >= count) break;
               const name = row.Name || row.name || row.Business || row.business_name || row.Company || row.company;
               if (!name) continue;
-              const created = await base44.entities.Lead.create({ name: String(name), company: String(row.Company || row.company || name), website, email, phone, location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
+              const ownerName = row.Owner || row.owner || row['Owner Name'] || row['Registered Name'] || row.registered_name || row['Business Owner'] || row['Contact Person'] || row.Manager || '';
+              const created = await base44.entities.Lead.create({ name: String(name), company: String(row.Company || row.company || name), owner_name: String(ownerName), website, email, phone, location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
               if (created?.id) resultIds.push(created.id);
               localCount++;
             }

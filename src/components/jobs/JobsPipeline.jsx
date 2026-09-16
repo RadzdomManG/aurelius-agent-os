@@ -26,7 +26,7 @@ function scoreTone(s) {
   return 'bg-stone-50 text-stone-400';
 }
 
-export default function JobsPipeline({ jobs, onMove, onOpen, readOnly }) {
+export default function JobsPipeline({ jobs, onMove, onOpen, readOnly, showScore = true }) {
   const byStatus = (status) => jobs.filter((j) => (j.status || 'saved') === status);
 
   const onDragEnd = (result) => {
@@ -72,7 +72,7 @@ export default function JobsPipeline({ jobs, onMove, onOpen, readOnly }) {
                                   <div className="text-[12.5px] font-semibold text-stone-800 truncate">{String(job.title || '').replace(/^\[(onlinejobsph|olj)\]\s*/i, '')}</div>
                                   <div className="text-[10px] text-stone-400 tabular-nums">{formatPosted(job.posted_at || job.created_date)}</div>
                                 </div>
-                                <span className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(job.match_score)} shrink-0 tabular-nums`}>{job.match_score || 0}</span>
+                                {showScore && <span className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(job.match_score)} shrink-0 tabular-nums`}>{job.match_score || 0}</span>}
                               </div>
                               <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                                 <span className="text-[10px] text-stone-400">Posted</span>

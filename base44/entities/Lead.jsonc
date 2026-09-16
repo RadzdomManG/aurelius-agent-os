@@ -8,6 +8,10 @@
     "company": {
       "type": "string"
     },
+    "owner_name": {
+      "type": "string",
+      "description": "Registered business owner or primary contact name (from scraper/LLM when available)"
+    },
     "website": {
       "type": "string"
     },

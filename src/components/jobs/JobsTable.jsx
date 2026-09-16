@@ -23,7 +23,7 @@ function scoreTone(s) {
 
 const STATUSES = ['saved', 'reviewing', 'apply', 'applied', 'interview', 'rejected', 'offer', 'ignore'];
 
-export default function JobsTable({ jobs, onOpen }) {
+export default function JobsTable({ jobs, onOpen, showScore = true }) {
   const [sortKey, setSortKey] = useState('posted_at');
   const [sortDir, setSortDir] = useState('desc');
   const [search, setSearch] = useState('');
@@ -69,18 +69,20 @@ export default function JobsTable({ jobs, onOpen }) {
           <option value="all">All statuses</option>
           {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
         </select>
-        <label className="inline-flex items-center gap-1.5 text-[12px] text-stone-500">
-          Min match
-          <input type="range" min={0} max={100} step={10} value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="accent-amber-500" />
-          <span className="tabular-nums w-7">{minScore}</span>
-        </label>
+        {showScore && (
+          <label className="inline-flex items-center gap-1.5 text-[12px] text-stone-500">
+            Min match
+            <input type="range" min={0} max={100} step={10} value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="accent-amber-500" />
+            <span className="tabular-nums w-7">{minScore}</span>
+          </label>
+        )}
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-[12.5px]">
           <thead className="bg-stone-50/60 sticky top-0">
             <tr>
-              {COLUMNS.map((c) => (
+              {COLUMNS.filter((c) => showScore || c.key !== 'match_score').map((c) => (
                 <th key={c.key} className="text-left px-3 py-2 font-medium text-stone-500">
                   <button onClick={() => toggleSort(c.key)} className="inline-flex items-center gap-1 hover:text-stone-700">
                     {c.label}
@@ -97,7 +99,7 @@ export default function JobsTable({ jobs, onOpen }) {
                 <td className="px-3 py-2 font-medium text-stone-800 max-w-[280px] truncate">{String(j.title || '').replace(/^\[(onlinejobsph|olj)\]\s*/i, '')}</td>
                 <td className="px-3 py-2 text-stone-500 tabular-nums">{formatPosted(j.posted_at || j.created_date)}</td>
                 <td className="px-3 py-2"><span className="capitalize text-stone-500">{(j.status || 'saved').replace(/_/g, ' ')}</span></td>
-                <td className="px-3 py-2"><span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(j.match_score)} tabular-nums`}>{j.match_score || 0}</span></td>
+                {showScore && <td className="px-3 py-2"><span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(j.match_score)} tabular-nums`}>{j.match_score || 0}</span></td>}
                 <td className="px-3 py-2 text-right">
                   {j.url && <a href={j.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-stone-400 hover:text-amber-600"><ExternalLink className="w-3.5 h-3.5" /></a>}
                 </td>

@@ -15,13 +15,26 @@ const COLUMNS = [
   { key: 'do_not_contact', label: 'Do Not Contact' },
 ];
 
+const STATUS_ACCENT = {
+  new: 'border-l-blue-400',
+  qualified: 'border-l-indigo-400',
+  contacted: 'border-l-cyan-400',
+  replied: 'border-l-teal-400',
+  interested: 'border-l-amber-400',
+  follow_up: 'border-l-orange-400',
+  meeting: 'border-l-violet-400',
+  won: 'border-l-emerald-400',
+  lost: 'border-l-rose-400',
+  do_not_contact: 'border-l-stone-400',
+};
+
 function scoreTone(s) {
   if (s >= 80) return 'bg-amber-100 text-amber-700';
   if (s >= 50) return 'bg-stone-100 text-stone-600';
   return 'bg-stone-50 text-stone-400';
 }
 
-export default function LeadPipeline({ leads, onMove, onOpen, readOnly }) {
+export default function LeadPipeline({ leads, onMove, onOpen, showScore = true }) {
   const byStatus = (status) => leads.filter((l) => (l.status || 'new') === status);
 
   const onDragEnd = (result) => {
@@ -58,16 +71,17 @@ export default function LeadPipeline({ leads, onMove, onOpen, readOnly }) {
                             <div
                               ref={p.innerRef}
                               {...p.draggableProps}
-                              {...(readOnly ? {} : p.dragHandleProps)}
+                              {...p.dragHandleProps}
                               onClick={() => onOpen(lead)}
-                              className={`bg-white rounded-lg border p-2.5 cursor-pointer hover:border-amber-300 transition-colors ${s.isDragging ? 'shadow-lg border-amber-300' : 'border-stone-200'}`}
+                              className={`bg-white rounded-lg border border-l-2 p-2.5 cursor-pointer hover:border-amber-300 hover:shadow-sm transition-all ${s.isDragging ? 'shadow-lg border-amber-300' : 'border-stone-200'} ${STATUS_ACCENT[lead.status || 'new'] || 'border-l-stone-300'}`}
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
                                   <div className="text-[12.5px] font-semibold text-stone-800 truncate">{lead.name}</div>
                                   {lead.company && <div className="text-[11px] text-stone-500 truncate">{lead.company}</div>}
+                                  {lead.owner_name && <div className="text-[10.5px] text-stone-400 truncate">Owner: {lead.owner_name}</div>}
                                 </div>
-                                <span className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(lead.lead_score)} shrink-0 tabular-nums`}>{lead.lead_score || 0}</span>
+                                {showScore && <span className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(lead.lead_score)} shrink-0 tabular-nums`}>{lead.lead_score || 0}</span>}
                               </div>
                               <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                                 {lead.industry && <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-500">{lead.industry}</span>}

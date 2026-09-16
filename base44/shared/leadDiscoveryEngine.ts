@@ -10,6 +10,11 @@
 //                  reading the owner's profile and all existing leads. Created
 //                  leads are visible to the owner (admin sees all) and to
 //                  customers (customer_data lists all).
+//
+// Count handling: the LLM is asked for a buffer above the requested count so
+// dedupe removals don't leave the user short. If a location filter is set and
+// the first pass still yields fewer than requested, a second pass automatically
+// widens the geographic area (nearby cities / broader region) and merges.
 
 type Mode = 'user' | 'service';
 
@@ -20,9 +25,40 @@ interface DiscoverOpts {
   userId?: string;
 }
 
+const SCORE_SCHEMA = {
+  type: 'object',
+  properties: {
+    leads: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          company: { type: 'string' },
+          owner_name: { type: 'string' },
+          website: { type: 'string' },
+          email: { type: 'string' },
+          phone: { type: 'string' },
+          social_profile: { type: 'string' },
+          industry: { type: 'string' },
+          location: { type: 'string' },
+          source: { type: 'string' },
+          reason_needed: { type: 'string' },
+          decision_maker: { type: 'boolean' },
+          website_quality: { type: 'string' },
+          social_presence: { type: 'string' },
+        },
+        required: ['name'],
+      },
+    },
+  },
+  required: ['leads'],
+};
+
 export async function discoverLeads(base44: any, mode: Mode, opts: DiscoverOpts) {
   const entities = mode === 'service' ? base44.asServiceRole.entities : base44.entities;
   const { message, filters, count } = opts;
+  const want = Math.min(Math.max(count || 20, 1), 50);
 
   let profile: any = {};
   let existingLeads: any[] = [];
@@ -42,61 +78,40 @@ export async function discoverLeads(base44: any, mode: Mode, opts: DiscoverOpts)
   const services = (profile.services || []).join(', ');
   const idealClients = (profile.ideal_clients || '').toLowerCase();
 
-  const filterParts = [
-    filters.industry && `Industry: ${filters.industry}`,
-    filters.location && `Location: ${filters.location}`,
-    filters.keywords && `Keywords: ${filters.keywords}`,
-    filters.service && `Service they might need: ${filters.service}`,
-    filters.company_type && `Company type: ${filters.company_type}`,
-  ].filter(Boolean);
-  const filterDesc = filterParts.length ? `Additional filters — ${filterParts.join('; ')}.` : '';
-
-  const prompt = `You are a lead-research assistant. Find up to ${count} REAL, publicly listed businesses or decision-makers that match this request. Only return businesses that genuinely appear in public sources (company websites, public directories, social profiles). Do NOT fabricate people, emails, or phone numbers — if a field is unknown, omit it.
+  const buildPrompt = (locationWidened: boolean, requestCount: number) => {
+    const useLocation = filters.location && !locationWidened;
+    const filterParts = [
+      filters.industry && `Industry: ${filters.industry}`,
+      useLocation && `Location: ${filters.location}`,
+      filters.keywords && `Keywords: ${filters.keywords}`,
+      filters.service && `Service they might need: ${filters.service}`,
+      filters.company_type && `Company type: ${filters.company_type}`,
+    ].filter(Boolean);
+    let filterDesc = filterParts.length ? `Additional filters — ${filterParts.join('; ')}.` : '';
+    if (locationWidened && filters.location) {
+      filterDesc += ` WIDEN the geographic area — include nearby cities, the broader region, and surrounding areas around "${filters.location}".`;
+    }
+    return `You are a lead-research assistant. Find up to ${requestCount} REAL, publicly listed businesses or decision-makers that match this request. Only return businesses that genuinely appear in public sources (company websites, public directories, social profiles). Do NOT fabricate people, emails, or phone numbers — if a field is unknown, omit it.
 
 REQUEST: "${message || filters.keywords || filters.service}"
 ${filterDesc}
 The user offers these services: ${services || 'AI content / automation services'}.
-For each prospect include: name (person or company), company, website, email (only if publicly available), phone (only if public), social_profile (LinkedIn or similar URL if public), industry, location, source (where you found them), reason_needed (one sentence: why they may need the user's service), decision_maker (true if this is likely a decision-maker), website_quality (good/basic/poor/unknown), social_presence (strong/moderate/weak/unknown).
+For each prospect include: name (person or company), company, owner_name (the registered business owner or primary contact person if publicly available, otherwise omit), website, email (only if publicly available), phone (only if public), social_profile (LinkedIn or similar URL if public), industry, location, source (where you found them), reason_needed (one sentence: why they may need the user's service), decision_maker (true if this is likely a decision-maker), website_quality (good/basic/poor/unknown), social_presence (strong/moderate/weak/unknown).
 
 Return JSON with a "leads" array.`;
+  };
 
-  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt,
-    add_context_from_internet: true,
-    model: 'gemini_3_flash',
-    response_json_schema: {
-      type: 'object',
-      properties: {
-        leads: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              company: { type: 'string' },
-              website: { type: 'string' },
-              email: { type: 'string' },
-              phone: { type: 'string' },
-              social_profile: { type: 'string' },
-              industry: { type: 'string' },
-              location: { type: 'string' },
-              source: { type: 'string' },
-              reason_needed: { type: 'string' },
-              decision_maker: { type: 'boolean' },
-              website_quality: { type: 'string' },
-              social_presence: { type: 'string' },
-            },
-            required: ['name'],
-          },
-        },
-      },
-      required: ['leads'],
-    },
-  });
+  const runLlm = async (prompt: string): Promise<any[]> => {
+    const result: any = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt,
+      add_context_from_internet: true,
+      model: 'gemini_3_flash',
+      response_json_schema: SCORE_SCHEMA,
+    });
+    return (result && result.leads) || [];
+  };
 
-  const candidates: any[] = (result && result.leads) || [];
-
-  // --- Dedupe ---
+  // --- Dedupe helpers ---
   const normDomain = (url: string): string => {
     if (!url) return '';
     let d = url.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/^www\./, '');
@@ -116,19 +131,27 @@ Return JSON with a "leads" array.`;
 
   const survivors: any[] = [];
   let duplicates = 0;
-  for (const c of candidates) {
-    if (!c || !c.name) continue;
-    const d = normDomain(c.website);
-    const n = normName(c.company || c.name);
-    const dupByDomain = d && domainIndex.get(d);
-    const dupByName = n && nameIndex.get(n);
-    if (dupByDomain || dupByName) {
-      duplicates++;
-      continue;
+  const addCandidates = (cands: any[]) => {
+    for (const c of cands) {
+      if (!c || !c.name) continue;
+      const d = normDomain(c.website);
+      const n = normName(c.company || c.name);
+      if ((d && domainIndex.get(d)) || (n && nameIndex.get(n))) {
+        duplicates++;
+        continue;
+      }
+      survivors.push(c);
+      if (d) domainIndex.set(d, { website: c.website });
+      if (n) nameIndex.set(n, { name: c.name });
     }
-    survivors.push(c);
-    if (d) domainIndex.set(d, { website: c.website });
-    if (n) nameIndex.set(n, { name: c.name });
+  };
+
+  // Ask for a buffer above the requested count so dedupe doesn't leave us short.
+  const requestCount = Math.min(want + 15, 50);
+  addCandidates(await runLlm(buildPrompt(false, requestCount)));
+  // If still short and a location was specified, widen the area and merge.
+  if (survivors.length < want && filters.location) {
+    addCandidates(await runLlm(buildPrompt(true, requestCount)));
   }
 
   // --- Score ---
@@ -136,6 +159,7 @@ Return JSON with a "leads" array.`;
     const reasons: string[] = [];
     let s = 30;
     if (c.decision_maker) { s += 15; reasons.push('decision-maker identified'); }
+    if (c.owner_name) { s += 5; reasons.push('owner identified'); }
     if (c.website) {
       s += 8;
       if (c.website_quality === 'good') { s += 7; reasons.push('quality website'); }
@@ -154,14 +178,15 @@ Return JSON with a "leads" array.`;
     return { score: s, reason };
   };
 
-  // --- Create leads + activity + notifications ---
+  // --- Create leads + activity + notifications (cap at requested count) ---
   const created: any[] = [];
   let highQuality = 0;
-  for (const c of survivors) {
+  for (const c of survivors.slice(0, want)) {
     const { score, reason } = scoreLead(c);
     const lead = await entities.Lead.create({
       name: c.name,
       company: c.company || '',
+      owner_name: c.owner_name || '',
       website: c.website || '',
       email: c.email || '',
       phone: c.phone || '',
@@ -180,7 +205,7 @@ Return JSON with a "leads" array.`;
     if (score >= 80) highQuality++;
     await entities.Activity.create({
       type: 'lead_discovered',
-      description: `Lead found: ${c.name}${c.company ? ` @ ${c.company}` : ''} (score ${score})`,
+      description: `Lead found: ${c.name}${c.company ? ` @ ${c.company}` : ''}${c.owner_name ? ` (owner: ${c.owner_name})` : ''} (score ${score})`,
       actor: 'sub_agent',
       sub_agent: 'lead_agent',
       severity: score >= 80 ? 'success' : 'info',
@@ -214,6 +239,6 @@ Return JSON with a "leads" array.`;
     found: created.length,
     duplicates,
     high_quality: highQuality,
-    leads: created.map((l) => ({ id: l.id, name: l.name, company: l.company, lead_score: l.lead_score })),
+    leads: created.map((l) => ({ id: l.id, name: l.name, company: l.company, owner_name: l.owner_name, lead_score: l.lead_score })),
   };
 }

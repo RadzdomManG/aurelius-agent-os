@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
 import { useLeadApi } from '@/lib/leadApi';
-import { X, Globe, Mail, Phone, MapPin, Linkedin, Save, Ban, Activity } from 'lucide-react';
+import { X, Globe, Mail, Phone, MapPin, Linkedin, Save, Ban, Activity, User } from 'lucide-react';
 
 const STATUSES = ['new', 'qualified', 'contacted', 'replied', 'interested', 'follow_up', 'meeting', 'won', 'lost', 'do_not_contact'];
 
-export default function LeadDetailDrawer({ lead, onClose, onUpdated, readOnly }) {
+export default function LeadDetailDrawer({ lead, onClose, onUpdated, showScore = true }) {
   const leadApi = useLeadApi();
   const [edit, setEdit] = useState(null);
   const [activities, setActivities] = useState([]);
@@ -55,29 +54,31 @@ export default function LeadDetailDrawer({ lead, onClose, onUpdated, readOnly })
 
         <div className="p-5 space-y-5">
           <div className="flex items-center gap-3">
-            <div className="flex flex-col items-center">
-              <span className={`text-2xl font-semibold tabular-nums ${lead.lead_score >= 80 ? 'text-amber-600' : lead.lead_score >= 50 ? 'text-stone-600' : 'text-stone-400'}`}>{lead.lead_score || 0}</span>
-              <span className="text-[10px] uppercase tracking-wider text-stone-400">score</span>
-            </div>
-            <div className="flex-1">
-              {readOnly ? (
-                <span className="inline-block capitalize text-[12.5px] text-stone-600 bg-stone-100 px-2.5 py-1.5 rounded-lg">{(edit.status || 'new').replace(/_/g, ' ')}</span>
-              ) : (
-                <select value={edit.status} onChange={(e) => setStatus(e.target.value)}
-                  className="w-full rounded-lg border border-stone-200 px-2.5 py-1.5 text-[12.5px] capitalize focus:outline-none focus:border-amber-400">
-                  {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
-                </select>
-              )}
-            </div>
-            {!readOnly && (
-              <button onClick={() => setStatus('do_not_contact')}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-stone-200 text-[12px] text-stone-500 hover:border-red-300 hover:text-red-500">
-                <Ban className="w-3.5 h-3.5" /> DNC
-              </button>
+            {showScore && (
+              <div className="flex flex-col items-center">
+                <span className={`text-2xl font-semibold tabular-nums ${lead.lead_score >= 80 ? 'text-amber-600' : lead.lead_score >= 50 ? 'text-stone-600' : 'text-stone-400'}`}>{lead.lead_score || 0}</span>
+                <span className="text-[10px] uppercase tracking-wider text-stone-400">score</span>
+              </div>
             )}
+            <div className="flex-1">
+              <select value={edit.status} onChange={(e) => setStatus(e.target.value)}
+                className="w-full rounded-lg border border-stone-200 px-2.5 py-1.5 text-[12.5px] capitalize focus:outline-none focus:border-amber-400">
+                {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
+              </select>
+            </div>
+            <button onClick={() => setStatus('do_not_contact')}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-stone-200 text-[12px] text-stone-500 hover:border-red-300 hover:text-red-500">
+              <Ban className="w-3.5 h-3.5" /> DNC
+            </button>
           </div>
 
-          {lead.score_reason && (
+          {lead.owner_name && (
+            <div className="flex items-center gap-1.5 text-[12.5px] text-stone-600 bg-stone-50 rounded-lg px-3 py-2">
+              <User className="w-3.5 h-3.5 text-stone-400" /> <span className="text-stone-400">Owner:</span> {lead.owner_name}
+            </div>
+          )}
+
+          {showScore && lead.score_reason && (
             <Field label="Why this score">{lead.score_reason}</Field>
           )}
           {lead.reason_needed && (
@@ -94,28 +95,22 @@ export default function LeadDetailDrawer({ lead, onClose, onUpdated, readOnly })
             {lead.source && <div className="text-stone-500"><span className="text-stone-400">Source:</span> {lead.source}</div>}
           </div>
 
-          {!readOnly && (
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium text-stone-500 block">Next action</label>
-              <input value={edit.next_action} onChange={(e) => setEdit({ ...edit, next_action: e.target.value })}
-                className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400" />
-            </div>
-          )}
+          <div className="space-y-2">
+            <label className="text-[11px] font-medium text-stone-500 block">Next action</label>
+            <input value={edit.next_action} onChange={(e) => setEdit({ ...edit, next_action: e.target.value })}
+              className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400" />
+          </div>
 
-          {!readOnly && (
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium text-stone-500 block">Notes</label>
-              <textarea value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} rows={3}
-                className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400 resize-none" />
-            </div>
-          )}
+          <div className="space-y-2">
+            <label className="text-[11px] font-medium text-stone-500 block">Notes</label>
+            <textarea value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} rows={3}
+              className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400 resize-none" />
+          </div>
 
-          {!readOnly && (
-            <button onClick={save} disabled={saving}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 text-white text-[13px] font-medium disabled:opacity-60">
-              <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save changes'}
-            </button>
-          )}
+          <button onClick={save} disabled={saving}
+            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 text-white text-[13px] font-medium disabled:opacity-60">
+            <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save changes'}
+          </button>
 
           <div>
             <div className="flex items-center gap-1.5 text-[11px] font-medium text-stone-500 mb-2"><Activity className="w-3.5 h-3.5" /> Activity timeline</div>

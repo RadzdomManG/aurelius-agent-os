@@ -49,7 +49,7 @@ export default function LeadComposer({ onDone }) {
               const name = row.Name || row.name || row.Business || row.business_name || row.Company || row.company;
               if (!name) continue;
               const ownerName = row.Owner || row.owner || row['Owner Name'] || row['Registered Name'] || row.registered_name || row['Business Owner'] || row['Contact Person'] || row.Manager || '';
-              const created = await base44.entities.Lead.create({ name: String(name), company: String(row.Company || row.company || name), owner_name: String(ownerName), website, email, phone, location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
+              const created = await base44.entities.Lead.create({ contact_note: missing.length ? `Missing: ${missing.join(', ')}` : 'All selected contact details found', name: String(name), company: String(row.Company || row.company || name), owner_name: String(ownerName), website, email, phone, location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
               if (created?.id) resultIds.push(created.id);
               localCount++;
             }

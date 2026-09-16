@@ -14,7 +14,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { mode, token } = usePortal();
-  if (mode === 'customer') return <CustomerHome token={token} />;
 
   const load = useCallback(async () => {
     try {
@@ -36,6 +35,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => { load(); const t = setInterval(load, 15000); return () => clearInterval(t); }, [load]);
+
+  if (mode === 'customer') return <CustomerHome token={token} />;
 
   if (loading) {
     return (

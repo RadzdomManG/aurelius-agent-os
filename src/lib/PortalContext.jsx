@@ -52,3 +52,5 @@ export const usePortal = () => {
   if (!ctx) throw new Error('usePortal must be used within PortalProvider');
   return ctx;
 };
+
+export default PortalProvider;

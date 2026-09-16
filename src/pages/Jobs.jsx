@@ -11,6 +11,7 @@ export default function Jobs() {
   const [view, setView] = useState(() => localStorage.getItem('aurelius_jobs_view') || 'pipeline');
   const [openJob, setOpenJob] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [qualifiedOnly, setQualifiedOnly] = useState(false);
   const pollRef = useRef(null);
 
   const load = useCallback(async () => {
@@ -36,7 +37,8 @@ export default function Jobs() {
     try { await base44.entities.Job.update(id, { status }); } catch { load(); }
   };
 
-  const newCount = jobs.length;
+  const displayedJobs = qualifiedOnly ? jobs.filter((j) => (j.match_score || 0) >= 70) : jobs;
+  const newCount = displayedJobs.length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 space-y-5">
@@ -55,6 +57,7 @@ export default function Jobs() {
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh
           </button>
           <div className="inline-flex rounded-xl border border-stone-200 bg-white p-0.5">
+            <button onClick={() => setQualifiedOnly((v) => !v)} className={`px-3 py-1.5 rounded-lg text-[12.5px] ${qualifiedOnly ? "bg-amber-100 text-amber-800" : "text-stone-500"}`}>Qualified ({jobs.filter((j) => (j.match_score || 0) >= 70).length})</button>
             <button onClick={() => setViewP('pipeline')}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] transition-colors ${view === 'pipeline' ? 'bg-stone-900 text-white' : 'text-stone-500'}`}>
               <KanbanSquare className="w-3.5 h-3.5" /> Pipeline
@@ -74,9 +77,9 @@ export default function Jobs() {
           No jobs yet. Start your local watcher.py bot to stream OnlineJobs.ph posts here in real time.
         </div>
       ) : view === 'pipeline' ? (
-        <JobsPipeline jobs={jobs} onMove={moveJob} onOpen={setOpenJob} />
+        <JobsPipeline jobs={displayedJobs} onMove={moveJob} onOpen={setOpenJob} />
       ) : (
-        <JobsTable jobs={jobs} onOpen={setOpenJob} />
+        <JobsTable jobs={displayedJobs} onOpen={setOpenJob} />
       )}
 
       <JobDetailDrawer job={openJob} onClose={() => setOpenJob(null)} onUpdated={(j) => setJobs((js) => js.map((x) => (x.id === j.id ? j : x)))} />

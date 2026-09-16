@@ -72,7 +72,7 @@ export default function Leads() {
       <LeadComposer onDone={async (result) => {
         setHasSearched(true); setShowHistory(false);
         if (result?.ids?.length) {
-          try { const all = await base44.entities.Lead.list('-created_date', 300); setLeads(all.filter((x) => result.ids.includes(x.id))); }
+          try { const all = await base44.entities.Lead.list('-created_date', 300); setLeads(all.filter((x) => result.ids.slice(0, result.requested_count || result.ids.length).includes(x.id))); }
           catch { setLeads([]); }
         } else setLeads([]);
       }} />

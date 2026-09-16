@@ -28,7 +28,7 @@ export default function Leads() {
     load();
     pollRef.current = setInterval(() => { if (showHistory) load(); }, 10000);
     return () => clearInterval(pollRef.current);
-  }, [load]);
+  }, [load, showHistory]);
 
   const setViewP = (v) => { setView(v); localStorage.setItem('aurelius_leads_view', v); };
 

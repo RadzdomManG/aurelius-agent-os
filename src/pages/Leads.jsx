@@ -24,7 +24,7 @@ export default function Leads() {
 
   const load = useCallback(async () => {
     try {
-      if (!isCustomer && !showHistory) { setLeads([]); return; }
+      if (!showHistory) { setLeads([]); return; }
       if (isCustomer) {
         const res = await base44.functions.invoke('customer_data', { token, resource: 'leads' });
         setLeads((res.data || res).rows || []);
@@ -96,7 +96,7 @@ export default function Leads() {
         </div>
       </div>
 
-      <LeadComposer onDone={async (result) => { setHasSearched(true); setShowHistory(false); if (result?.ids?.length && !isCustomer) { const all = await base44.entities.Lead.list('-created_date', 300); setLeads(all.filter((x) => result.ids.includes(x.id))); } else if (!isCustomer) setLeads([]); }} />
+      <LeadComposer onDone={async (result) => { setHasSearched(true); setShowHistory(false); if (result?.ids?.length) { try { const all = await base44.entities.Lead.list('-created_date', 300); setLeads(all.filter((x) => result.ids.includes(x.id))); } catch { setLeads([]); } } else setLeads([]); }} />
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-stone-300" /></div>

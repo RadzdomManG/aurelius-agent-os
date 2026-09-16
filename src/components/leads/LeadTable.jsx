@@ -9,12 +9,6 @@ const BASE_COLUMNS = [
   { key: 'location', label: 'Location' },
 ];
 
-const CONTACT_COLUMN = {
-  email: { key: 'email', label: 'Email' },
-  phone: { key: 'phone', label: 'Phone' },
-  website: { key: 'website', label: 'Website' },
-};
-
 const STATUS_COLORS = {
   new: 'bg-blue-100 text-blue-700',
   qualified: 'bg-indigo-100 text-indigo-700',
@@ -44,16 +38,20 @@ export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSe
   const [minScore, setMinScore] = useState(0);
   const [contactFilter, setContactFilter] = useState('all');
 
-  const contactColumn = CONTACT_COLUMN[contactFilter];
+  const showContacts = contactFilter !== 'all';
 
   const columns = useMemo(() => {
     const cols = [...BASE_COLUMNS];
-    if (contactColumn) cols.push(contactColumn);
+    if (showContacts) {
+      cols.push({ key: 'email', label: 'Email' });
+      cols.push({ key: 'phone', label: 'Phone' });
+      cols.push({ key: 'website', label: 'Website' });
+    }
     cols.push({ key: 'status', label: 'Status' });
     if (showScore) cols.push({ key: 'lead_score', label: 'Score' });
     cols.push({ key: 'last_contacted', label: 'Last contact' });
     return cols;
-  }, [contactColumn, showScore]);
+  }, [showContacts, showScore]);
 
   const filtered = useMemo(() => {
     let r = leads.filter((l) => {
@@ -157,9 +155,9 @@ export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSe
                 <td className="px-3 py-2 text-stone-500">{l.owner_name || '—'}</td>
                 <td className="px-3 py-2 text-stone-500">{l.industry || '—'}</td>
                 <td className="px-3 py-2 text-stone-500">{l.location || '—'}</td>
-                {contactColumn && (
-                  <td className="px-3 py-2 text-stone-600 max-w-[200px] truncate">{l[contactColumn.key] || '—'}</td>
-                )}
+                {showContacts && (<td className="px-3 py-2 text-stone-600 text-[11px] max-w-[180px] truncate">{l.email || '—'}</td>)}
+                {showContacts && (<td className="px-3 py-2 text-stone-600 text-[11px] max-w-[140px] truncate">{l.phone || '—'}</td>)}
+                {showContacts && (<td className="px-3 py-2 text-stone-600 text-[11px] max-w-[180px] truncate">{l.website || '—'}</td>)}
                 <td className="px-3 py-2">
                   <span className={`inline-block capitalize text-[11px] px-2 py-0.5 rounded-full ${STATUS_COLORS[l.status || 'new'] || 'bg-stone-100 text-stone-500'}`}>{(l.status || 'new').replace(/_/g, ' ')}</span>
                 </td>

@@ -110,7 +110,7 @@ export default function Leads() {
         </div>
       </div>
 
-      <LeadComposer onDone={async (result) => { setHasSearched(true); setShowHistory(false); let next = result?.records || []; if (!next.length && result?.ids?.length) { try { const all = await base44.entities.Lead.list('-created_date', 300); next = all.filter((x) => result.ids.includes(x.id)); } catch { next = []; } } setLeads(next); try { sessionStorage.setItem(currentKey, JSON.stringify(next)); } catch {} }} />
+      <LeadComposer onDone={async (result) => { setSearchRunning(false); setHasSearched(true); setShowHistory(false); let next = result?.records || []; if (!next.length && result?.ids?.length) { try { const all = await base44.entities.Lead.list('-created_date', 300); next = all.filter((x) => result.ids.includes(x.id)); } catch { next = []; } } setLeads(next); try { sessionStorage.setItem(currentKey, JSON.stringify(next)); } catch {} }} />
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-stone-300" /></div>

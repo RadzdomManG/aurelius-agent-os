@@ -12,8 +12,7 @@
       "type": "string"
     },
     "source": {
-      "type": "string",
-      "description": "Job board / source"
+      "type": "string"
     },
     "location": {
       "type": "string"
@@ -30,12 +29,10 @@
     },
     "match_score": {
       "type": "number",
-      "default": 0,
-      "description": "0-100 match against profile"
+      "default": 0
     },
     "match_reason": {
-      "type": "string",
-      "description": "Why this job matches"
+      "type": "string"
     },
     "skills_matched": {
       "type": "array",
@@ -58,12 +55,16 @@
       "default": "saved"
     },
     "application_url": {
-      "type": "string",
-      "description": "Direct apply link when auto-apply not permitted"
+      "type": "string"
     },
     "applied_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "posted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Original source posting time from OLJ"
     },
     "notes": {
       "type": "string"
@@ -73,8 +74,7 @@
     },
     "owner_email": {
       "type": "string",
-      "format": "email",
-      "description": "Owner email for jobs ingested from the local OLJ watcher"
+      "format": "email"
     }
   },
   "required": [

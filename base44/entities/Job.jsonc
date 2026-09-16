@@ -70,6 +70,11 @@
     },
     "duplicate_of": {
       "type": "string"
+    },
+    "owner_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Owner email for jobs ingested from the local OLJ watcher"
     }
   },
   "required": [

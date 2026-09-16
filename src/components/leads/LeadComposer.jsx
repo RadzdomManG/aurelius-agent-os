@@ -7,7 +7,7 @@ export default function LeadComposer({ onDone }) {
   const leadApi = useLeadApi();
   const [message, setMessage] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ business: '', location: '', keywords: '', contact: ['all'], company_type: '' });
+  const [filters, setFilters] = useState({ business: '', location: '', keywords: '', contact: ['all'], company_type: '', match_mode: 'strict' });
   const [count, setCount] = useState(20);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState(null);

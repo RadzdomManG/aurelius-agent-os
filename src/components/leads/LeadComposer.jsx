@@ -5,10 +5,12 @@ import { Search, SlidersHorizontal, Loader2, Sparkles } from 'lucide-react';
 export default function LeadComposer({ onDone }) {
   const [message, setMessage] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ business: '', location: '', keywords: '', contact: 'all', company_type: '' });
+  const [filters, setFilters] = useState({ business: '', location: '', keywords: '', contact: ['all'], company_type: '' });
   const [count, setCount] = useState(20);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState(null);
+
+  const toggleContact = (value) => setFilters((f) => ({ ...f, contact: value === 'all' ? ['all'] : (f.contact.includes(value) ? f.contact.filter((x) => x !== value) : [...f.contact.filter((x) => x !== 'all'), value]) }));
 
   const run = async () => {
     const q = message.trim() || filters.keywords || filters.business;
@@ -28,7 +30,7 @@ export default function LeadComposer({ onDone }) {
             const email = String(row.Email || row.email || '');
             const phone = String(row.Phone || row['Phone Number'] || row.phone || '');
             const website = String(row.Website || row.website || '');
-            if ((filters.contact === 'email' && !email) || (filters.contact === 'phone' && !phone) || (filters.contact === 'website' && !website)) continue;
+            if ((filters.contact.includes('email') && !email) || (filters.contact.includes('phone') && !phone) || (filters.contact.includes('website') && !website)) continue;
             if (localCount >= count) break;
             const name = row.Name || row.name || row.Business || row.business_name || row.Company || row.company;
             if (!name) continue;
@@ -82,7 +84,7 @@ export default function LeadComposer({ onDone }) {
           <FilterInput label="Business" value={filters.business} onChange={(v) => setFilters({ ...filters, business: v })} placeholder="Barbershop, car wash" />
           <FilterInput label="Location" value={filters.location} onChange={(v) => setFilters({ ...filters, location: v })} placeholder="California, United States" />
           <FilterInput label="Keywords" value={filters.keywords} onChange={(v) => setFilters({ ...filters, keywords: v })} placeholder="AI content" />
-          <label className="block"><span className="text-[10.5px] font-medium text-stone-500 mb-1 block">Contact required</span><select value={filters.contact} onChange={(e) => setFilters({ ...filters, contact: e.target.value })} className="w-full rounded-lg border border-stone-200 px-2.5 py-2 text-[12.5px]"><option value="all">Any contact</option><option value="email">With email</option><option value="phone">With phone</option><option value="website">With website</option></select></label>
+          <div className="block"><span className="text-[10.5px] font-medium text-stone-500 mb-1 block">Contact required</span><div className="flex flex-wrap gap-x-3 gap-y-1 rounded-lg border border-stone-200 px-2.5 py-2 text-[11.5px]"><label className="inline-flex items-center gap-1"><input type="checkbox" checked={filters.contact.includes('all')} onChange={() => toggleContact('all')} /> Any</label><label className="inline-flex items-center gap-1"><input type="checkbox" checked={filters.contact.includes('email')} onChange={() => toggleContact('email')} /> Email</label><label className="inline-flex items-center gap-1"><input type="checkbox" checked={filters.contact.includes('phone')} onChange={() => toggleContact('phone')} /> Phone</label><label className="inline-flex items-center gap-1"><input type="checkbox" checked={filters.contact.includes('website')} onChange={() => toggleContact('website')} /> Website</label></div></div>
           <label className="block">
             <span className="text-[10.5px] font-medium text-stone-500 mb-1 block">Count</span>
             <input type="number" min={1} max={50} value={count} onChange={(e) => setCount(Number(e.target.value) || 20)}

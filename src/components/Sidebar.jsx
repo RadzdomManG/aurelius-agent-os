@@ -12,15 +12,10 @@ const nav = [
   { to: '/aurelius', label: 'Aurelius', icon: Sparkles },
   { to: '/leads', label: 'Leads', icon: Users },
   { to: '/jobs', label: 'Jobs', icon: Briefcase },
-  { to: '/inbox', label: 'Inbox', icon: Inbox, soon: true },
-  { to: '/crm', label: 'CRM', icon: Contact, soon: true },
-  { to: '/tasks', label: 'Tasks', icon: ListTodo, soon: true },
-  { to: '/calendar', label: 'Calendar', icon: Calendar, soon: true },
-  { to: '/memory', label: 'Memory', icon: Brain, soon: true },
-  { to: '/approvals', label: 'Approvals', icon: CheckCheck, soon: true },
-  { to: '/activity', label: 'Activity', icon: Activity, soon: true },
-  { to: '/integrations', label: 'Integrations', icon: Plug, soon: true },
-  { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/inbox', label: 'Inbox', icon: Inbox },
+  { to: '/crm', label: 'CRM', icon: Contact },
+  { to: '/tasks', label: 'Tasks', icon: ListTodo },
+  { to: '/calendar', label: 'Calendar', icon: Calendar },
 ];
 
 export default function Sidebar({ autonomyMode = 'manual', onOpenMobile }) {

@@ -4,7 +4,7 @@ import { X, Globe, MapPin, ExternalLink, Save, Activity, Briefcase } from 'lucid
 
 const STATUSES = ['saved', 'reviewing', 'apply', 'applied', 'interview', 'rejected', 'offer', 'ignore'];
 
-export default function JobDetailDrawer({ job, onClose, onUpdated }) {
+export default function JobDetailDrawer({ job, onClose, onUpdated, readOnly }) {
   const [edit, setEdit] = useState(null);
   const [activities, setActivities] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -23,10 +23,11 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
   }, [job]);
 
   useEffect(() => {
+    if (readOnly) return;
     const onKeyDown = (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && job && edit && !saving) { e.preventDefault(); save(); } };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [job, edit, saving]);
+  }, [job, edit, saving, readOnly]);
 
   if (!job || !edit) return null;
 
@@ -65,10 +66,14 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
               <span className="text-[10px] uppercase tracking-wider text-stone-400">match</span>
             </div>
             <div className="flex-1">
-              <select value={edit.status} onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-lg border border-stone-200 px-2.5 py-1.5 text-[12.5px] capitalize focus:outline-none focus:border-amber-400">
-                {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
-              </select>
+              {readOnly ? (
+                <span className="inline-block capitalize text-[12.5px] text-stone-600 bg-stone-100 px-2.5 py-1.5 rounded-lg">{(edit.status || 'saved').replace(/_/g, ' ')}</span>
+              ) : (
+                <select value={edit.status} onChange={(e) => setStatus(e.target.value)}
+                  className="w-full rounded-lg border border-stone-200 px-2.5 py-1.5 text-[12.5px] capitalize focus:outline-none focus:border-amber-400">
+                  {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
+                </select>
+              )}
             </div>
           </div>
 
@@ -97,22 +102,28 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
             </Field>
           )}
 
-          <div className="space-y-2">
-            <label className="text-[11px] font-medium text-stone-500 block">Application URL</label>
-            <input value={edit.application_url} onChange={(e) => setEdit({ ...edit, application_url: e.target.value })}
-              className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400" />
-          </div>
+          {!readOnly && (
+            <div className="space-y-2">
+              <label className="text-[11px] font-medium text-stone-500 block">Application URL</label>
+              <input value={edit.application_url} onChange={(e) => setEdit({ ...edit, application_url: e.target.value })}
+                className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400" />
+            </div>
+          )}
 
-          <div className="space-y-2">
-            <label className="text-[11px] font-medium text-stone-500 block">Notes</label>
-            <textarea value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); save(); } }} rows={3}
-              className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400 resize-none" />
-          </div>
+          {!readOnly && (
+            <div className="space-y-2">
+              <label className="text-[11px] font-medium text-stone-500 block">Notes</label>
+              <textarea value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); save(); } }} rows={3}
+                className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400 resize-none" />
+            </div>
+          )}
 
-          <button onClick={save} disabled={saving}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 text-white text-[13px] font-medium disabled:opacity-60">
-            <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save changes'} <span className="text-[10px] opacity-60 ml-1">Ctrl+Enter</span>
-          </button>
+          {!readOnly && (
+            <button onClick={save} disabled={saving}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 text-white text-[13px] font-medium disabled:opacity-60">
+              <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save changes'} <span className="text-[10px] opacity-60 ml-1">Ctrl+Enter</span>
+            </button>
+          )}
 
           <div>
             <div className="flex items-center gap-1.5 text-[11px] font-medium text-stone-500 mb-2"><Activity className="w-3.5 h-3.5" /> Activity</div>

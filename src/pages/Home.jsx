@@ -6,11 +6,15 @@ import {
   ArrowRight, Sparkles, Clock, AlertCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { usePortal } from '@/lib/PortalContext';
+import CustomerHome from '@/components/portal/CustomerHome';
 
 export default function Home() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { mode, token } = usePortal();
+  if (mode === 'customer') return <CustomerHome token={token} />;
 
   const load = useCallback(async () => {
     try {

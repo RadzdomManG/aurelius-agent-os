@@ -12,7 +12,8 @@
       "type": "string"
     },
     "source": {
-      "type": "string"
+      "type": "string",
+      "description": "Job board / source"
     },
     "location": {
       "type": "string"
@@ -29,10 +30,12 @@
     },
     "match_score": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "0-100 match against profile"
     },
     "match_reason": {
-      "type": "string"
+      "type": "string",
+      "description": "Why this job matches"
     },
     "skills_matched": {
       "type": "array",
@@ -55,29 +58,64 @@
       "default": "saved"
     },
     "application_url": {
-      "type": "string"
+      "type": "string",
+      "description": "Direct apply link when auto-apply not permitted"
     },
     "applied_at": {
       "type": "string",
       "format": "date-time"
-    },
-    "posted_at": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Original source posting time from OLJ"
     },
     "notes": {
       "type": "string"
     },
     "duplicate_of": {
       "type": "string"
-    },
-    "owner_email": {
-      "type": "string",
-      "format": "email"
     }
   },
   "required": [
     "title"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

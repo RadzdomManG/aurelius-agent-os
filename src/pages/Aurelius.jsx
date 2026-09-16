@@ -2,17 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import CommandConsole from '@/components/CommandConsole';
 import { Sparkles } from 'lucide-react';
+import { usePortal } from '@/lib/PortalContext';
+import CustomerAurelius from '@/components/portal/CustomerAurelius';
 
 export default function Aurelius() {
+  const { mode } = usePortal();
   const [autonomyMode, setAutonomyMode] = useState('manual');
+
   useEffect(() => {
+    if (mode !== 'owner') return;
     (async () => {
       try {
         const p = await base44.entities.UserProfile.filter({});
         if (p[0]) setAutonomyMode(p[0].autonomy_mode || 'manual');
       } catch { /* noop */ }
     })();
-  }, []);
+  }, [mode]);
+
+  if (mode === 'customer') return <CustomerAurelius />;
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 lg:py-8 h-[calc(100vh-4rem)] flex flex-col">

@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { usePortal } from '@/lib/PortalContext';
 import Sidebar from '@/components/Sidebar';
-import { Sparkles, Bell, Menu, X } from 'lucide-react';
+import { Sparkles, Menu, X } from 'lucide-react';
 
 export default function AppLayout() {
+  const { isOwner } = usePortal();
   const [autonomyMode, setAutonomyMode] = useState('manual');
   const [unread, setUnread] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!isOwner) return; // customers have no platform session — skip owner-only reads
     let active = true;
     (async () => {
       try {
@@ -21,9 +24,7 @@ export default function AppLayout() {
         if (!active) return;
         if (profiles[0]) setAutonomyMode(profiles[0].autonomy_mode || 'manual');
         setUnread(notifs.length);
-      } catch {
-        /* ignore on first load */
-      }
+      } catch { /* ignore */ }
     })();
     const t = setInterval(async () => {
       try {
@@ -32,13 +33,12 @@ export default function AppLayout() {
       } catch { /* noop */ }
     }, 20000);
     return () => { active = false; clearInterval(t); };
-  }, []);
+  }, [isOwner]);
 
   return (
     <div className="min-h-screen flex bg-[hsl(var(--background))]">
       <Sidebar autonomyMode={autonomyMode} />
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
@@ -63,21 +63,23 @@ export default function AppLayout() {
             <span className="font-display font-semibold text-sm">Aurelius</span>
           </div>
           <div className="hidden lg:block text-[13px] text-stone-400">
-            Your AI operator is online
+            {isOwner ? 'Your AI operator is online' : 'Aurelius CRM portal'}
           </div>
           <div className="flex-1" />
-          <button
-            onClick={() => navigate('/')}
-            className="relative w-9 h-9 rounded-lg hover:bg-stone-100 flex items-center justify-center text-stone-500 transition-colors"
-            title="Notifications"
-          >
-            <Bell className="w-[18px] h-[18px]" />
-            {unread > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-bold flex items-center justify-center">
-                {unread > 9 ? '9+' : unread}
-              </span>
-            )}
-          </button>
+          {isOwner && (
+            <button
+              onClick={() => navigate('/')}
+              className="relative w-9 h-9 rounded-lg hover:bg-stone-100 flex items-center justify-center text-stone-500 transition-colors"
+              title="Notifications"
+            >
+              <span className="text-[16px]">🔔</span>
+              {unread > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {unread > 9 ? '9+' : unread}
+                </span>
+              )}
+            </button>
+          )}
         </header>
 
         <main className="flex-1 min-w-0">

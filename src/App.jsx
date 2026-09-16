@@ -6,8 +6,10 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import AppLayout from '@/components/AppLayout';
+import PortalProvider from '@/lib/PortalContext';
+import PortalRoute from '@/components/PortalRoute';
+import OwnerRoute from '@/components/OwnerRoute';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -19,6 +21,8 @@ import Settings from '@/pages/Settings';
 import Leads from '@/pages/Leads';
 import Jobs from '@/pages/Jobs';
 import ModulePage from '@/pages/ModulePage';
+import AccessCodeLogin from '@/pages/AccessCodeLogin';
+import AccessCodes from '@/pages/AccessCodes';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -38,27 +42,31 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
+      return <Navigate to="/access" replace />;
     }
   }
 
   // Render the main app
   return (
     <Routes>
+      <Route path="/access" element={<AccessCodeLogin />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+      <Route element={<PortalRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/aurelius" element={<Aurelius />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/settings" element={<Settings />} />
           <Route path="/leads" element={<Leads />} />
           <Route path="/jobs" element={<Jobs />} />
+        </Route>
+      </Route>
+      <Route element={<OwnerRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/access-codes" element={<AccessCodes />} />
           <Route path="/inbox" element={<ModulePage module="inbox" />} />
           <Route path="/crm" element={<ModulePage module="crm" />} />
           <Route path="/tasks" element={<ModulePage module="tasks" />} />
@@ -79,13 +87,15 @@ function App() {
 
   return (
     <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <ScrollToTop />
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
+      <PortalProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <ScrollToTop />
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </QueryClientProvider>
+      </PortalProvider>
     </AuthProvider>
   )
 }

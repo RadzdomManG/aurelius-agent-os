@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import JobsPipeline from '@/components/jobs/JobsPipeline';
 import JobsTable from '@/components/jobs/JobsTable';
 import JobDetailDrawer from '@/components/jobs/JobDetailDrawer';
+import { usePortal } from '@/lib/PortalContext';
 import { KanbanSquare, Table2, Loader2, RefreshCw, Radio } from 'lucide-react';
 
 function jobTime(job) {
@@ -12,6 +13,8 @@ function jobTime(job) {
 }
 
 export default function Jobs() {
+  const { mode, token } = usePortal();
+  const readOnly = mode === 'customer';
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState(() => localStorage.getItem('aurelius_jobs_view') || 'pipeline');
@@ -24,11 +27,17 @@ export default function Jobs() {
 
   const load = useCallback(async () => {
     try {
-      const j = await base44.entities.Job.list('-posted_at', 500);
-      setJobs([...j].sort((a, b) => jobTime(b) - jobTime(a)));
+      if (readOnly) {
+        const res = await base44.functions.invoke('customer_data', { token, resource: 'jobs' });
+        const j = (res.data || res).rows || [];
+        setJobs([...j].sort((a, b) => jobTime(b) - jobTime(a)));
+      } else {
+        const j = await base44.entities.Job.list('-posted_at', 500);
+        setJobs([...j].sort((a, b) => jobTime(b) - jobTime(a)));
+      }
     } catch { /* noop */ }
     finally { setLoading(false); setRefreshing(false); }
-  }, []);
+  }, [readOnly, token]);
 
   useEffect(() => {
     load();
@@ -43,6 +52,7 @@ export default function Jobs() {
   const refresh = () => { setRefreshing(true); load(); };
 
   const moveJob = async (id, status) => {
+    if (readOnly) return;
     setJobs((js) => js.map((j) => (j.id === id ? { ...j, status } : j)));
     try { await base44.entities.Job.update(id, { status }); } catch { load(); }
   };
@@ -96,12 +106,12 @@ export default function Jobs() {
           No jobs yet. Start your local watcher.py bot to stream OnlineJobs.ph posts here in real time.
         </div>
       ) : view === 'pipeline' ? (
-        <JobsPipeline jobs={displayedJobs} onMove={moveJob} onOpen={setOpenJob} />
+        <JobsPipeline jobs={displayedJobs} onMove={moveJob} onOpen={setOpenJob} readOnly={readOnly} />
       ) : (
         <JobsTable jobs={displayedJobs} onOpen={setOpenJob} />
       )}
 
-      <JobDetailDrawer job={openJob} onClose={() => setOpenJob(null)} onUpdated={(j) => setJobs((js) => js.map((x) => (x.id === j.id ? j : x)))} />
+      <JobDetailDrawer job={openJob} onClose={() => setOpenJob(null)} readOnly={readOnly} onUpdated={(j) => setJobs((js) => js.map((x) => (x.id === j.id ? j : x)))} />
     </div>
   );
 }

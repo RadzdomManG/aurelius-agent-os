@@ -19,7 +19,7 @@ function scoreTone(s) {
 
 const STATUSES = ['new', 'qualified', 'contacted', 'replied', 'interested', 'follow_up', 'meeting', 'won', 'lost', 'do_not_contact'];
 
-export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSelected }) {
+export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSelected, readOnly }) {
   const [sortKey, setSortKey] = useState('lead_score');
   const [sortDir, setSortDir] = useState('desc');
   const [search, setSearch] = useState('');
@@ -99,9 +99,11 @@ export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSe
         <table className="w-full text-[12.5px]">
           <thead className="bg-stone-50/60 sticky top-0">
             <tr>
-              <th className="w-9 px-3 py-2">
-                <button onClick={toggleAll}>{selected.length && selected.length === filtered.length ? <CheckSquare className="w-4 h-4 text-amber-500" /> : <Square className="w-4 h-4 text-stone-300" />}</button>
-              </th>
+              {!readOnly && (
+                <th className="w-9 px-3 py-2">
+                  <button onClick={toggleAll}>{selected.length && selected.length === filtered.length ? <CheckSquare className="w-4 h-4 text-amber-500" /> : <Square className="w-4 h-4 text-stone-300" />}</button>
+                </th>
+              )}
               {COLUMNS.map((c) => (
                 <th key={c.key} className="text-left px-3 py-2 font-medium text-stone-500">
                   <button onClick={() => toggleSort(c.key)} className="inline-flex items-center gap-1 hover:text-stone-700">
@@ -115,9 +117,11 @@ export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSe
           <tbody className="divide-y divide-stone-100">
             {filtered.map((l) => (
               <tr key={l.id} onClick={() => onOpen(l)} className="hover:bg-stone-50 cursor-pointer">
-                <td className="px-3 py-2" onClick={(e) => { e.stopPropagation(); toggleOne(l.id); }}>
-                  {selected.includes(l.id) ? <CheckSquare className="w-4 h-4 text-amber-500" /> : <Square className="w-4 h-4 text-stone-300" />}
-                </td>
+                {!readOnly && (
+                  <td className="px-3 py-2" onClick={(e) => { e.stopPropagation(); toggleOne(l.id); }}>
+                    {selected.includes(l.id) ? <CheckSquare className="w-4 h-4 text-amber-500" /> : <Square className="w-4 h-4 text-stone-300" />}
+                  </td>
+                )}
                 <td className="px-3 py-2 font-medium text-stone-800">{l.name}</td>
                 <td className="px-3 py-2 text-stone-500">{l.company || '—'}</td>
                 <td className="px-3 py-2 text-stone-500">{l.industry || '—'}</td>

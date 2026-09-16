@@ -1,0 +1,47 @@
+{
+  "name": "AccessSession",
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string",
+      "description": "Opaque session token issued after a valid code"
+    },
+    "code_id": {
+      "type": "string",
+      "description": "The AccessCode this session was issued from"
+    },
+    "code_label": {
+      "type": "string"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "token",
+    "code_id"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

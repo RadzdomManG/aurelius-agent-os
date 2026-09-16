@@ -21,7 +21,7 @@ function scoreTone(s) {
   return 'bg-stone-50 text-stone-400';
 }
 
-export default function LeadPipeline({ leads, onMove, onOpen }) {
+export default function LeadPipeline({ leads, onMove, onOpen, readOnly }) {
   const byStatus = (status) => leads.filter((l) => (l.status || 'new') === status);
 
   const onDragEnd = (result) => {
@@ -58,7 +58,7 @@ export default function LeadPipeline({ leads, onMove, onOpen }) {
                             <div
                               ref={p.innerRef}
                               {...p.draggableProps}
-                              {...p.dragHandleProps}
+                              {...(readOnly ? {} : p.dragHandleProps)}
                               onClick={() => onOpen(lead)}
                               className={`bg-white rounded-lg border p-2.5 cursor-pointer hover:border-amber-300 transition-colors ${s.isDragging ? 'shadow-lg border-amber-300' : 'border-stone-200'}`}
                             >

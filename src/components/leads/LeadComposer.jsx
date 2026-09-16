@@ -47,7 +47,7 @@ export default function LeadComposer({ onDone }) {
         } catch (_) { /* local scraper is optional when this browser cannot reach localhost */ }
       }
       setToast({ ok: true, text: `Found ${d.found} AI leads + ${localCount} Google Maps leads · ${d.duplicates} duplicates removed · ${d.high_quality} high-quality` });
-      onDone?.({ ...d, ids: resultIds.slice(0, count), requested_count: count });
+      onDone?.({ ...d, ids: resultIds.slice(0, count), records: (d.leads || []).slice(0, count), requested_count: count });
       setMessage('');
     } catch (e) {
       setToast({ ok: false, text: e.message || 'Discovery failed' });

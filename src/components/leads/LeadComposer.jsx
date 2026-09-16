@@ -21,8 +21,15 @@ export default function LeadComposer({ onDone }) {
     setToast(null);
     try {
       const d = await leadApi.searchLeads(q, filters, count);
+      const contactMatches = (row) => {
+        const email = String(row.email || row.Email || '');
+        const phone = String(row.phone || row.Phone || row['Phone Number'] || '');
+        const website = String(row.website || row.Website || '');
+        return (!filters.contact.includes('email') || !!email) && (!filters.contact.includes('phone') || !!phone) && (!filters.contact.includes('website') || !!website);
+      };
+      const eligibleAi = (d.leads || []).filter(contactMatches);
       let localCount = 0;
-      const resultIds = (d.leads || []).map((x) => x.id).filter(Boolean);
+      const resultIds = eligibleAi.map((x) => x.id).filter(Boolean);
       // The local Google Maps scraper only runs on the owner's machine; skip
       // it for customers (their browser can't reach localhost anyway).
       if (!leadApi.isCustomer) {
@@ -46,8 +53,9 @@ export default function LeadComposer({ onDone }) {
           }
         } catch (_) { /* local scraper is optional when this browser cannot reach localhost */ }
       }
-      setToast({ ok: true, text: `Found ${d.found} AI leads + ${localCount} Google Maps leads · ${d.duplicates} duplicates removed · ${d.high_quality} high-quality` });
-      onDone?.({ ...d, ids: resultIds.slice(0, count), records: (d.leads || []).slice(0, count), requested_count: count });
+      const totalEligible = Math.min(count, eligibleAi.length + localCount);
+      setToast({ ok: true, text: totalEligible ? `Found ${totalEligible} leads matching your contact requirements` : 'No leads matched all selected contact requirements. Try fewer requirements or another location.' });
+      onDone?.({ ...d, ids: resultIds.slice(0, count), records: eligibleAi.slice(0, count), requested_count: count });
       setMessage('');
     } catch (e) {
       setToast({ ok: false, text: e.message || 'Discovery failed' });

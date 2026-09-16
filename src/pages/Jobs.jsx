@@ -12,6 +12,7 @@ export default function Jobs() {
   const [openJob, setOpenJob] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [qualifiedOnly, setQualifiedOnly] = useState(false);
+  const [keywordFilter, setKeywordFilter] = useState('');
   const pollRef = useRef(null);
 
   const load = useCallback(async () => {
@@ -37,7 +38,15 @@ export default function Jobs() {
     try { await base44.entities.Job.update(id, { status }); } catch { load(); }
   };
 
-  const displayedJobs = qualifiedOnly ? jobs.filter((j) => (j.match_score || 0) >= 70) : jobs;
+  const displayedJobs = jobs.filter((j) => {
+    if (qualifiedOnly && (j.match_score || 0) < 70) return false;
+    if (keywordFilter.trim()) {
+      const hay = `${j.title || ''} ${j.description || ''}`.toLowerCase();
+      const terms = keywordFilter.toLowerCase().split(',').map((x) => x.trim()).filter(Boolean);
+      if (!terms.some((term) => hay.includes(term))) return false;
+    }
+    return true;
+  });
   const newCount = displayedJobs.length;
 
   return (
@@ -52,7 +61,8 @@ export default function Jobs() {
           </h1>
           <p className="text-[13px] text-stone-400">{newCount} jobs · auto-refreshing every 30s from your local OLJ watcher · owner: Radzdomgallego4@gmail.com</p>
         </div>
-        <div className="inline-flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <input value={keywordFilter} onChange={(e) => setKeywordFilter(e.target.value)} placeholder="Filter keywords: AI content, ComfyUI, VA" className="w-64 rounded-xl border border-stone-200 bg-white px-3 py-1.5 text-[12.5px] focus:outline-none focus:border-amber-400" />
           <button onClick={refresh} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-600 text-[12.5px] hover:border-stone-300">
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh
           </button>

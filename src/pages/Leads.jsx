@@ -37,7 +37,7 @@ export default function Leads() {
   }, [isCustomer, token, showHistory]);
 
   useEffect(() => {
-    load();
+    if (showHistory) load();
     pollRef.current = setInterval(() => { if (showHistory) load(); }, 10000);
     return () => clearInterval(pollRef.current);
   }, [load, showHistory]);

@@ -13,6 +13,13 @@ const COLUMNS = [
   { key: 'ignore', label: 'Ignore' },
 ];
 
+function formatPosted(value) {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
 function scoreTone(s) {
   if (s >= 70) return 'bg-amber-100 text-amber-700';
   if (s >= 40) return 'bg-stone-100 text-stone-600';
@@ -63,17 +70,12 @@ export default function JobsPipeline({ jobs, onMove, onOpen }) {
                               <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
                                   <div className="text-[12.5px] font-semibold text-stone-800 truncate">{String(job.title || '').replace(/^\[(onlinejobsph|olj)\]\s*/i, '')}</div>
-                                  {job.company && <div className="text-[11px] text-stone-500 truncate">{job.company}</div>}
+                                  <div className="text-[10px] text-stone-400 tabular-nums">{formatPosted(job.posted_at || job.created_date)}</div>
                                 </div>
                                 <span className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(job.match_score)} shrink-0 tabular-nums`}>{job.match_score || 0}</span>
                               </div>
                               <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                {job.remote && <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600">Remote</span>}
-                                {job.location && (
-                                  <span className="inline-flex items-center gap-0.5 text-[10px] text-stone-400">
-                                    <MapPin className="w-2.5 h-2.5" /> {job.location}
-                                  </span>
-                                )}
+                                <span className="text-[10px] text-stone-400">Posted</span>
                                 {job.url && <a href={job.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="ml-auto text-stone-300 hover:text-amber-600" title="Open original job post"><ExternalLink className="w-3 h-3" /></a>}
                               </div>
                             </div>

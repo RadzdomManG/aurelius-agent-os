@@ -22,6 +22,7 @@ export default function Leads() {
   const [openLead, setOpenLead] = useState(null);
   const [selected, setSelected] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [searchRunning, setSearchRunning] = useState(() => { try { return JSON.parse(localStorage.getItem('aurelius_lead_search_status') || 'null')?.running === true; } catch { return false; } });
   const [showHistory, setShowHistory] = useState(false);
   const pollRef = useRef(null);
 

@@ -19,20 +19,22 @@ export default function LeadComposer({ onDone }) {
       const res = await base44.functions.invoke('lead_discovery', { message: q, filters, count });
       const d = res.data || res;
       let localCount = 0;
+      const resultIds = [];
       try {
         const local = await fetch('http://127.0.0.1:5000/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Access-Code': 'AGS-DEMO-2026' }, body: JSON.stringify({ keyword: q, location: filters.location || 'United States', limit: count }) });
         if (local.ok) {
           const ld = await local.json();
-          for (const row of (ld.leads || [])) {
+          for (const row of (ld.leads || []).slice(0, count)) {
             const name = row.Name || row.name || row.Business || row.business_name || row.Company || row.company;
             if (!name) continue;
-            await base44.entities.Lead.create({ name: String(name), company: String(row.Company || row.company || name), website: String(row.Website || row.website || ''), email: String(row.Email || row.email || ''), phone: String(row.Phone || row['Phone Number'] || row.phone || ''), location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
+            const created = await base44.entities.Lead.create({ name: String(name), company: String(row.Company || row.company || name), website: String(row.Website || row.website || ''), email: String(row.Email || row.email || ''), phone: String(row.Phone || row['Phone Number'] || row.phone || ''), location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
+            if (created?.id) resultIds.push(created.id);
             localCount++;
           }
         }
       } catch (_) { /* local scraper is optional when this browser cannot reach localhost */ }
       setToast({ ok: true, text: `Found ${d.found} AI leads + ${localCount} Google Maps leads · ${d.duplicates} duplicates removed · ${d.high_quality} high-quality` });
-      onDone?.(d);
+      onDone?.({ ...d, ids: resultIds });
       setMessage('');
     } catch (e) {
       setToast({ ok: false, text: e.message || 'Discovery failed' });

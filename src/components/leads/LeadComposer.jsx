@@ -37,7 +37,7 @@ export default function LeadComposer({ onDone }) {
       // it for customers (their browser can't reach localhost anyway).
       if (!leadApi.isCustomer) {
         try {
-          const local = await fetch('http://127.0.0.1:5000/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Access-Code': 'AGS-DEMO-2026' }, body: JSON.stringify({ keyword: q, location: filters.location || 'United States', limit: count + 15 }) });
+          const local = await fetch('http://127.0.0.1:5000/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: q, location: filters.location || 'United States', limit: count + 15 }) });
           if (local.ok) {
             const ld = await local.json();
             for (const row of (ld.leads || [])) {

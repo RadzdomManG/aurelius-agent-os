@@ -13,7 +13,10 @@ export default function Leads() {
   const isCustomer = mode === 'customer';
   const showScore = false;
   const leadApi = useLeadApi();
-  const [leads, setLeads] = useState([]);
+  const currentKey = `aurelius_current_leads_${isCustomer ? 'customer' : 'owner'}`;
+  const [leads, setLeads] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem(currentKey) || '[]'); } catch { return []; }
+  });
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState(() => localStorage.getItem('aurelius_leads_view') || 'pipeline');
   const [openLead, setOpenLead] = useState(null);
@@ -24,7 +27,10 @@ export default function Leads() {
 
   const load = useCallback(async () => {
     try {
-      if (!showHistory) { setLeads([]); return; }
+      if (!showHistory) {
+        try { setLeads(JSON.parse(sessionStorage.getItem(currentKey) || '[]')); } catch { setLeads([]); }
+        return;
+      }
       if (isCustomer) {
         const res = await base44.functions.invoke('customer_data', { token, resource: 'leads' });
         setLeads((res.data || res).rows || []);
@@ -34,14 +40,17 @@ export default function Leads() {
       }
     } catch { /* noop */ }
     finally { setLoading(false); }
-  }, [isCustomer, token, showHistory]);
+  }, [isCustomer, token, showHistory, currentKey]);
 
   useEffect(() => {
     if (showHistory) load();
-    else setLoading(false);
+    else {
+      try { setLeads(JSON.parse(sessionStorage.getItem(currentKey) || '[]')); } catch { setLeads([]); }
+      setLoading(false);
+    }
     pollRef.current = setInterval(() => { if (showHistory) load(); }, 10000);
     return () => clearInterval(pollRef.current);
-  }, [load, showHistory]);
+  }, [load, showHistory, currentKey]);
 
   const setViewP = (v) => { setView(v); localStorage.setItem('aurelius_leads_view', v); };
 
@@ -97,7 +106,7 @@ export default function Leads() {
         </div>
       </div>
 
-      <LeadComposer onDone={async (result) => { setHasSearched(true); setShowHistory(false); if (result?.records?.length) { setLeads(result.records); } else if (result?.ids?.length) { try { const all = await base44.entities.Lead.list('-created_date', 300); setLeads(all.filter((x) => result.ids.includes(x.id))); } catch { setLeads([]); } } else setLeads([]); }} />
+      <LeadComposer onDone={async (result) => { setHasSearched(true); setShowHistory(false); let next = result?.records || []; if (!next.length && result?.ids?.length) { try { const all = await base44.entities.Lead.list('-created_date', 300); next = all.filter((x) => result.ids.includes(x.id)); } catch { next = []; } } setLeads(next); try { sessionStorage.setItem(currentKey, JSON.stringify(next)); } catch {} }} />
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-stone-300" /></div>

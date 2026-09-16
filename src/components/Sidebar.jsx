@@ -40,7 +40,7 @@ export default function Sidebar({ autonomyMode = 'manual', onOpenMobile }) {
         </div>
         <div className="leading-tight">
           <div className="font-display text-[15px] font-semibold tracking-tight text-[#211F1D]">Aurelius</div>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[#AAAAAA]">Agent OS</div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[#AAAAAA]">CRM</div>
         </div>
       </div>
 

@@ -131,6 +131,15 @@ Return JSON with a "leads" array.`;
 
   const survivors: any[] = [];
   let duplicates = 0;
+  const requiredContacts = Array.isArray(filters.contact) ? filters.contact.filter((x: string) => ['email', 'phone', 'website'].includes(x)) : [];
+  const hasRequiredContacts = (c: any) => {
+    const email = String(c?.email || c?.Email || '').trim();
+    const phone = String(c?.phone || c?.Phone || c?.['Phone Number'] || '').trim();
+    const website = String(c?.website || c?.Website || '').trim();
+    return (!requiredContacts.includes('email') || !!email) &&
+      (!requiredContacts.includes('phone') || !!phone) &&
+      (!requiredContacts.includes('website') || !!website);
+  };
   const addCandidates = (cands: any[]) => {
     for (const c of cands) {
       if (!c || !c.name) continue;

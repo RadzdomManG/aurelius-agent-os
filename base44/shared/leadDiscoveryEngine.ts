@@ -248,6 +248,6 @@ Return JSON with a "leads" array.`;
     found: created.length,
     duplicates,
     high_quality: highQuality,
-    leads: created.map((l) => ({ id: l.id, name: l.name, company: l.company, owner_name: l.owner_name, lead_score: l.lead_score })),
+    leads: created.map((l) => ({ id: l.id, name: l.name, company: l.company, owner_name: l.owner_name, email: l.email, phone: l.phone, website: l.website, location: l.location, industry: l.industry, source: l.source, status: l.status, lead_score: l.lead_score })),
   };
 }

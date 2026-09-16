@@ -49,7 +49,10 @@ export default function Leads() {
       try { setLeads(JSON.parse(sessionStorage.getItem(currentKey) || '[]')); } catch { setLeads([]); }
       setLoading(false);
     }
-    pollRef.current = setInterval(() => { if (showHistory) load(); }, 10000);
+    pollRef.current = setInterval(() => {
+      if (showHistory) load();
+      try { setSearchRunning(JSON.parse(localStorage.getItem('aurelius_lead_search_status') || 'null')?.running === true); } catch {}
+    }, 1000);
     return () => clearInterval(pollRef.current);
   }, [load, showHistory, currentKey]);
 

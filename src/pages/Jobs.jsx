@@ -18,7 +18,7 @@ export default function Jobs() {
 
   const load = useCallback(async () => {
     try {
-      const j = await base44.entities.Job.list('-created_date', 500);
+      const j = await base44.entities.Job.list('-posted_at', 500);
       setJobs(j);
     } catch { /* noop */ }
     finally { setLoading(false); setRefreshing(false); }

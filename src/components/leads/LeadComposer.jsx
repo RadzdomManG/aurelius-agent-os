@@ -42,7 +42,9 @@ export default function LeadComposer({ onDone }) {
               const email = String(row.Email || row.email || '');
               const phone = String(row.Phone || row['Phone Number'] || row.phone || '');
               const website = String(row.Website || row.website || '');
-              if ((filters.contact.includes('email') && !email) || (filters.contact.includes('phone') && !phone) || (filters.contact.includes('website') && !website)) continue;
+              const missing = filters.contact.filter((x) => x !== 'all' && ((x === 'email' && !email) || (x === 'phone' && !phone) || (x === 'website' && !website)));
+              if (filters.match_mode === 'strict' && missing.length) continue;
+              if (filters.match_mode === 'near' && missing.length === filters.contact.filter((x) => x !== 'all').length) continue;
               if (localCount >= count) break;
               const name = row.Name || row.name || row.Business || row.business_name || row.Company || row.company;
               if (!name) continue;

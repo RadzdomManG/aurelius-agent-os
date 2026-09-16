@@ -71,6 +71,7 @@ export default function LeadComposer({ onDone }) {
       </div>
 
       {showFilters && (
+        <div className="mt-3 mb-2 rounded-lg bg-blue-50 border border-blue-100 px-3 py-2 text-[11.5px] text-blue-700">Google Maps scraper: enter a keyword and location, choose a count, then click Find leads. The local scraper must be running with access code AGS-DEMO-2026.</div>
         <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
           <FilterInput label="Industry" value={filters.industry} onChange={(v) => setFilters({ ...filters, industry: v })} placeholder="Marketing" />
           <FilterInput label="Location" value={filters.location} onChange={(v) => setFilters({ ...filters, location: v })} placeholder="United States" />

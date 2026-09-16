@@ -66,6 +66,7 @@ export default function Leads() {
             <Table2 className="w-3.5 h-3.5" /> Table
           </button>
         </div>
+        </div>
       </div>
 
       <LeadComposer onDone={() => { setHasSearched(true); setShowHistory(false); load(); }} />

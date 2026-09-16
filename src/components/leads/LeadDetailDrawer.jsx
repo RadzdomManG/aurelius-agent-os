@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useLeadApi } from '@/lib/leadApi';
 import { X, Globe, Mail, Phone, MapPin, Linkedin, Save, Ban, Activity } from 'lucide-react';
 
 const STATUSES = ['new', 'qualified', 'contacted', 'replied', 'interested', 'follow_up', 'meeting', 'won', 'lost', 'do_not_contact'];
 
 export default function LeadDetailDrawer({ lead, onClose, onUpdated, readOnly }) {
+  const leadApi = useLeadApi();
   const [edit, setEdit] = useState(null);
   const [activities, setActivities] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -14,7 +16,7 @@ export default function LeadDetailDrawer({ lead, onClose, onUpdated, readOnly })
       setEdit({ notes: lead.notes || '', next_action: lead.next_action || '', status: lead.status || 'new' });
       (async () => {
         try {
-          const acts = await base44.entities.Activity.filter({ related_type: 'Lead', related_id: lead.id }, '-created_date', 20);
+          const acts = await leadApi.getActivities(lead.id);
           setActivities(acts);
         } catch { setActivities([]); }
       })();
@@ -26,7 +28,7 @@ export default function LeadDetailDrawer({ lead, onClose, onUpdated, readOnly })
   const save = async () => {
     setSaving(true);
     try {
-      await base44.entities.Lead.update(lead.id, edit);
+      await leadApi.updateLead(lead.id, edit);
       onUpdated?.({ ...lead, ...edit });
       onClose();
     } catch (e) { alert(e.message); }
@@ -34,7 +36,7 @@ export default function LeadDetailDrawer({ lead, onClose, onUpdated, readOnly })
   };
 
   const setStatus = async (status) => {
-    await base44.entities.Lead.update(lead.id, { status });
+    await leadApi.updateLead(lead.id, { status });
     onUpdated?.({ ...lead, status });
     setEdit({ ...edit, status });
   };

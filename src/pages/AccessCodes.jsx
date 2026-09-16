@@ -6,7 +6,7 @@ export default function AccessCodes() {
   const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState({ label: '', max_uses: 0, expires_at: '' });
+  const [form, setForm] = useState({ label: '', max_uses: 0, valid_days: '' });
   const [toast, setToast] = useState(null);
 
   const load = useCallback(async () => {
@@ -30,10 +30,10 @@ export default function AccessCodes() {
         label: form.label.trim() || 'Untitled',
         active: true,
         max_uses: Number(form.max_uses) || 0,
-        expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null,
+        expires_at: Number(form.valid_days) > 0 ? new Date(Date.now() + Number(form.valid_days) * 86400000).toISOString() : null,
         uses: 0,
       });
-      setForm({ label: '', max_uses: 0, expires_at: '' });
+      setForm({ label: '', max_uses: 0, valid_days: '' });
       setToast({ ok: true, text: `Created ${code}` });
       load();
     } catch (err) {
@@ -76,7 +76,8 @@ export default function AccessCodes() {
           <input type="number" min={0} value={form.max_uses} onChange={(e) => setForm({ ...form, max_uses: e.target.value })}
             placeholder="Max uses (0 = ∞)"
             className="rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400" />
-          <input type="datetime-local" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
+          <input type="number" min={0} value={form.valid_days} onChange={(e) => setForm({ ...form, valid_days: e.target.value })}
+            placeholder="Valid days (0 = ∞)"
             className="rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400" />
         </div>
         <div className="mt-3 flex justify-end">

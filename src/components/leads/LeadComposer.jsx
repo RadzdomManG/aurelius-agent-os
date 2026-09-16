@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useLeadApi } from '@/lib/leadApi';
 import { Search, SlidersHorizontal, Loader2, Sparkles } from 'lucide-react';
 
 export default function LeadComposer({ onDone }) {
+  const leadApi = useLeadApi();
   const [message, setMessage] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({ business: '', location: '', keywords: '', contact: ['all'], company_type: '' });
@@ -18,28 +20,31 @@ export default function LeadComposer({ onDone }) {
     setBusy(true);
     setToast(null);
     try {
-      const res = await base44.functions.invoke('lead_discovery', { message: q, filters, count });
-      const d = res.data || res;
+      const d = await leadApi.searchLeads(q, filters, count);
       let localCount = 0;
       const resultIds = (d.leads || []).map((x) => x.id).filter(Boolean);
-      try {
-        const local = await fetch('http://127.0.0.1:5000/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Access-Code': 'AGS-DEMO-2026' }, body: JSON.stringify({ keyword: q, location: filters.location || 'United States', limit: count }) });
-        if (local.ok) {
-          const ld = await local.json();
-          for (const row of (ld.leads || [])) {
-            const email = String(row.Email || row.email || '');
-            const phone = String(row.Phone || row['Phone Number'] || row.phone || '');
-            const website = String(row.Website || row.website || '');
-            if ((filters.contact.includes('email') && !email) || (filters.contact.includes('phone') && !phone) || (filters.contact.includes('website') && !website)) continue;
-            if (localCount >= count) break;
-            const name = row.Name || row.name || row.Business || row.business_name || row.Company || row.company;
-            if (!name) continue;
-            const created = await base44.entities.Lead.create({ name: String(name), company: String(row.Company || row.company || name), website, email, phone, location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
-            if (created?.id) resultIds.push(created.id);
-            localCount++;
+      // The local Google Maps scraper only runs on the owner's machine; skip
+      // it for customers (their browser can't reach localhost anyway).
+      if (!leadApi.isCustomer) {
+        try {
+          const local = await fetch('http://127.0.0.1:5000/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Access-Code': 'AGS-DEMO-2026' }, body: JSON.stringify({ keyword: q, location: filters.location || 'United States', limit: count }) });
+          if (local.ok) {
+            const ld = await local.json();
+            for (const row of (ld.leads || [])) {
+              const email = String(row.Email || row.email || '');
+              const phone = String(row.Phone || row['Phone Number'] || row.phone || '');
+              const website = String(row.Website || row.website || '');
+              if ((filters.contact.includes('email') && !email) || (filters.contact.includes('phone') && !phone) || (filters.contact.includes('website') && !website)) continue;
+              if (localCount >= count) break;
+              const name = row.Name || row.name || row.Business || row.business_name || row.Company || row.company;
+              if (!name) continue;
+              const created = await base44.entities.Lead.create({ name: String(name), company: String(row.Company || row.company || name), website, email, phone, location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
+              if (created?.id) resultIds.push(created.id);
+              localCount++;
+            }
           }
-        }
-      } catch (_) { /* local scraper is optional when this browser cannot reach localhost */ }
+        } catch (_) { /* local scraper is optional when this browser cannot reach localhost */ }
+      }
       setToast({ ok: true, text: `Found ${d.found} AI leads + ${localCount} Google Maps leads · ${d.duplicates} duplicates removed · ${d.high_quality} high-quality` });
       onDone?.({ ...d, ids: resultIds.slice(0, count), requested_count: count });
       setMessage('');

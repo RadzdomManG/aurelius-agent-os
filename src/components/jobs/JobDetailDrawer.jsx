@@ -21,7 +21,7 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
     }
   }, [job]);
 
-  if (!job) return null;
+  if (!job || !edit) return null;
 
   const save = async () => {
     setSaving(true);
@@ -85,7 +85,7 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
 
           {job.description && (
             <Field label="Description">
-              <div className="whitespace-pre-wrap max-h-48 overflow-y-auto">{job.description}</div>
+              <div className="whitespace-pre-wrap">{job.description}</div>
             </Field>
           )}
 

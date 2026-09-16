@@ -26,7 +26,7 @@ export default function Leads() {
 
   useEffect(() => {
     load();
-    pollRef.current = setInterval(load, 10000);
+    pollRef.current = setInterval(() => { if (showHistory) load(); }, 10000);
     return () => clearInterval(pollRef.current);
   }, [load]);
 

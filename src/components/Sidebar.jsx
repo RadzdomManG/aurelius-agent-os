@@ -47,15 +47,6 @@ export default function Sidebar({ autonomyMode = 'manual', onOpenMobile }) {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
         {nav.map((item) => {
           const Icon = item.icon;
-          if (item.soon) {
-            return (
-              <div key={item.to} className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#555555] cursor-not-allowed select-none">
-                <Icon className="w-[18px] h-[18px]" />
-                <span className="text-[13.5px] flex-1">{item.label}</span>
-                <span className="text-[9px] uppercase tracking-wider text-[#AAAAAA] bg-[#EFEFEF] px-1.5 py-0.5 rounded">SOON</span>
-              </div>
-            );
-          }
           return (
             <NavLink
               key={item.to}

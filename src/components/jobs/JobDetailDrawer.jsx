@@ -8,6 +8,7 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
   const [edit, setEdit] = useState(null);
   const [activities, setActivities] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [expandedDescription, setExpandedDescription] = useState(false);
 
   useEffect(() => {
     if (job) {
@@ -85,7 +86,8 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
 
           {job.description && (
             <Field label="Description">
-              <div className="whitespace-pre-wrap">{job.description}</div>
+              <div className={`whitespace-pre-wrap ${expandedDescription ? '' : 'max-h-48 overflow-hidden'}`}>{job.description}</div>
+              {job.description.length > 700 && <button onClick={() => setExpandedDescription((v) => !v)} className="mt-2 text-[12px] font-medium text-amber-700 hover:text-amber-800">{expandedDescription ? 'See less' : 'See more'}</button>}
             </Field>
           )}
 

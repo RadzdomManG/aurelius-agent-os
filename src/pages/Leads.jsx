@@ -69,7 +69,13 @@ export default function Leads() {
         </div>
       </div>
 
-      <LeadComposer onDone={() => { setHasSearched(true); setShowHistory(false); load(); }} />
+      <LeadComposer onDone={async (result) => {
+        setHasSearched(true); setShowHistory(false);
+        if (result?.ids?.length) {
+          try { const all = await base44.entities.Lead.list('-created_date', 300); setLeads(all.filter((x) => result.ids.includes(x.id))); }
+          catch { setLeads([]); }
+        } else setLeads([]);
+      }} />
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-stone-300" /></div>

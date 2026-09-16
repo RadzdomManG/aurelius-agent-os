@@ -13,9 +13,6 @@ const nav = [
   { to: '/leads', label: 'Leads', icon: Users },
   { to: '/jobs', label: 'Jobs', icon: Briefcase },
   { to: '/inbox', label: 'Inbox', icon: Inbox },
-  { to: '/crm', label: 'CRM', icon: Contact },
-  { to: '/tasks', label: 'Tasks', icon: ListTodo },
-  { to: '/calendar', label: 'Calendar', icon: Calendar },
 ];
 
 export default function Sidebar({ autonomyMode = 'manual', onOpenMobile }) {

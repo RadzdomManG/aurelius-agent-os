@@ -42,14 +42,10 @@ export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSe
 
   const columns = useMemo(() => {
     const cols = [...BASE_COLUMNS];
-    if (showContacts) {
-      cols.push({ key: 'email', label: 'Email' });
-      cols.push({ key: 'phone', label: 'Phone' });
-      cols.push({ key: 'website', label: 'Website' });
-    }
+    cols.push({ key: 'email', label: 'Email' });
+    cols.push({ key: 'phone', label: 'Phone' });
+    cols.push({ key: 'website', label: 'Website' });
     cols.push({ key: 'status', label: 'Status' });
-    if (showScore) cols.push({ key: 'lead_score', label: 'Score' });
-    cols.push({ key: 'last_contacted', label: 'Last contact' });
     return cols;
   }, [showContacts, showScore]);
 
@@ -155,16 +151,13 @@ export default function LeadTable({ leads, onOpen, onBulkStatus, selected, setSe
                 <td className="px-3 py-2 text-stone-500">{l.owner_name || '—'}</td>
                 <td className="px-3 py-2 text-stone-500">{l.industry || '—'}</td>
                 <td className="px-3 py-2 text-stone-500">{l.location || '—'}</td>
-                {showContacts && (<td className="px-3 py-2 text-stone-600 text-[11px] max-w-[180px] truncate">{l.email || '—'}</td>)}
-                {showContacts && (<td className="px-3 py-2 text-stone-600 text-[11px] max-w-[140px] truncate">{l.phone || '—'}</td>)}
-                {showContacts && (<td className="px-3 py-2 text-stone-600 text-[11px] max-w-[180px] truncate">{l.website || '—'}</td>)}
+                <td className="px-3 py-2 text-stone-600 text-[11px] max-w-[180px] truncate">{l.email || '—'}</td>
+                <td className="px-3 py-2 text-stone-600 text-[11px] max-w-[140px] truncate">{l.phone || '—'}</td>
+                <td className="px-3 py-2 text-stone-600 text-[11px] max-w-[180px] truncate">{l.website || '—'}</td>
                 <td className="px-3 py-2">
                   <span className={`inline-block capitalize text-[11px] px-2 py-0.5 rounded-full ${STATUS_COLORS[l.status || 'new'] || 'bg-stone-100 text-stone-500'}`}>{(l.status || 'new').replace(/_/g, ' ')}</span>
                 </td>
-                {showScore && (
-                  <td className="px-3 py-2"><span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(l.lead_score)} tabular-nums`}>{l.lead_score || 0}</span></td>
-                )}
-                <td className="px-3 py-2 text-stone-400">{l.last_contacted ? new Date(l.last_contacted).toLocaleDateString() : '—'}</td>
+
               </tr>
             ))}
             {filtered.length === 0 && (

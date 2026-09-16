@@ -52,7 +52,7 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
       <div className="relative w-full max-w-md bg-white h-full shadow-2xl overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-stone-100 px-5 py-3.5 flex items-center justify-between">
           <div className="min-w-0">
-            <div className="font-display text-[15px] font-semibold text-stone-800 truncate">{job.title}</div>
+            <div className="font-display text-[15px] font-semibold text-stone-800 truncate">{String(job.title || '').replace(/^\[(onlinejobsph|olj)\]\s*/i, '')}</div>
             {job.company && <div className="text-[12px] text-stone-400 truncate">{job.company}</div>}
           </div>
           <button onClick={onClose} className="text-stone-400 hover:text-stone-700"><X className="w-5 h-5" /></button>

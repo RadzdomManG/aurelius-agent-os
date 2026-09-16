@@ -80,6 +80,7 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
             {job.location && <div className="flex items-center gap-1.5 text-stone-500"><MapPin className="w-3.5 h-3.5" /> {job.remote ? 'Remote' : job.location}</div>}
             {job.salary && <div className="text-stone-500"><span className="text-stone-400">Salary:</span> {job.salary}</div>}
             {job.source && <div className="text-stone-500"><span className="text-stone-400">Source:</span> {job.source}</div>}
+            {job.owner_email && <div className="text-stone-500 col-span-2"><span className="text-stone-400">Owner:</span> {job.owner_email}</div>}
           </div>
 
           {job.description && (

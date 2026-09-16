@@ -55,7 +55,8 @@ export default function LeadComposer({ onDone }) {
       }
       const totalEligible = Math.min(count, eligibleAi.length + localCount);
       setToast({ ok: true, text: totalEligible ? `Found ${totalEligible} leads matching your contact requirements` : 'No leads matched all selected contact requirements. Try fewer requirements or another location.' });
-      onDone?.({ ...d, ids: resultIds.slice(0, count), records: eligibleAi.slice(0, count), requested_count: count });
+      const localRecords = (d.leads || []).filter((x) => resultIds.includes(x.id));
+      onDone?.({ ...d, ids: resultIds.slice(0, count), records: localRecords.slice(0, count), requested_count: count, no_match: !totalEligible });
       setMessage('');
     } catch (e) {
       setToast({ ok: false, text: e.message || 'Discovery failed' });

@@ -5,13 +5,13 @@ import { Search, SlidersHorizontal, Loader2, Sparkles } from 'lucide-react';
 export default function LeadComposer({ onDone }) {
   const [message, setMessage] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ industry: '', location: '', keywords: '', service: '', company_type: '' });
+  const [filters, setFilters] = useState({ business: '', location: '', keywords: '', contact: 'all', company_type: '' });
   const [count, setCount] = useState(20);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState(null);
 
   const run = async () => {
-    const q = message.trim() || filters.keywords || filters.service;
+    const q = message.trim() || filters.keywords || filters.business;
     if (!q || busy) return;
     setBusy(true);
     setToast(null);
@@ -24,10 +24,15 @@ export default function LeadComposer({ onDone }) {
         const local = await fetch('http://127.0.0.1:5000/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Access-Code': 'AGS-DEMO-2026' }, body: JSON.stringify({ keyword: q, location: filters.location || 'United States', limit: count }) });
         if (local.ok) {
           const ld = await local.json();
-          for (const row of (ld.leads || []).slice(0, count)) {
+          for (const row of (ld.leads || [])) {
+            const email = String(row.Email || row.email || '');
+            const phone = String(row.Phone || row['Phone Number'] || row.phone || '');
+            const website = String(row.Website || row.website || '');
+            if ((filters.contact === 'email' && !email) || (filters.contact === 'phone' && !phone) || (filters.contact === 'website' && !website)) continue;
+            if (localCount >= count) break;
             const name = row.Name || row.name || row.Business || row.business_name || row.Company || row.company;
             if (!name) continue;
-            const created = await base44.entities.Lead.create({ name: String(name), company: String(row.Company || row.company || name), website: String(row.Website || row.website || ''), email: String(row.Email || row.email || ''), phone: String(row.Phone || row['Phone Number'] || row.phone || ''), location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
+            const created = await base44.entities.Lead.create({ name: String(name), company: String(row.Company || row.company || name), website, email, phone, location: String(row.Address || row.address || filters.location || ''), industry: q, source: 'Google Maps scraper', status: 'new', lead_score: 60 });
             if (created?.id) resultIds.push(created.id);
             localCount++;
           }
@@ -73,12 +78,11 @@ export default function LeadComposer({ onDone }) {
       </div>
 
       {showFilters && (
-        <><div className="mt-3 mb-2 rounded-lg bg-blue-50 border border-blue-100 px-3 py-2 text-[11.5px] text-blue-700">Google Maps scraper: enter a keyword and location, choose a count, then click Find leads. The local scraper must be running with access code AGS-DEMO-2026.</div>
-        <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-          <FilterInput label="Industry" value={filters.industry} onChange={(v) => setFilters({ ...filters, industry: v })} placeholder="Marketing" />
-          <FilterInput label="Location" value={filters.location} onChange={(v) => setFilters({ ...filters, location: v })} placeholder="United States" />
+        <><div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+          <FilterInput label="Business" value={filters.business} onChange={(v) => setFilters({ ...filters, business: v })} placeholder="Barbershop, car wash" />
+          <FilterInput label="Location" value={filters.location} onChange={(v) => setFilters({ ...filters, location: v })} placeholder="California, United States" />
           <FilterInput label="Keywords" value={filters.keywords} onChange={(v) => setFilters({ ...filters, keywords: v })} placeholder="AI content" />
-          <FilterInput label="Service needed" value={filters.service} onChange={(v) => setFilters({ ...filters, service: v })} placeholder="AI influencer" />
+          <label className="block"><span className="text-[10.5px] font-medium text-stone-500 mb-1 block">Contact required</span><select value={filters.contact} onChange={(e) => setFilters({ ...filters, contact: e.target.value })} className="w-full rounded-lg border border-stone-200 px-2.5 py-2 text-[12.5px]"><option value="all">Any contact</option><option value="email">With email</option><option value="phone">With phone</option><option value="website">With website</option></select></label>
           <label className="block">
             <span className="text-[10.5px] font-medium text-stone-500 mb-1 block">Count</span>
             <input type="number" min={1} max={50} value={count} onChange={(e) => setCount(Number(e.target.value) || 20)}

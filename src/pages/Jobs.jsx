@@ -48,7 +48,7 @@ export default function Jobs() {
               <Radio className="w-3 h-3" /> Live
             </span>
           </h1>
-          <p className="text-[13px] text-stone-400">{newCount} jobs · auto-refreshing every 30s from your local watcher</p>
+          <p className="text-[13px] text-stone-400">{newCount} jobs · auto-refreshing every 30s from your local OLJ watcher · owner: Radzdomgallego4@gmail.com</p>
         </div>
         <div className="inline-flex items-center gap-2">
           <button onClick={refresh} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-600 text-[12.5px] hover:border-stone-300">

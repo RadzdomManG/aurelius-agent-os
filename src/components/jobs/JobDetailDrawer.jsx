@@ -22,13 +22,13 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
     }
   }, [job]);
 
-  if (!job || !edit) return null;
-
   useEffect(() => {
     const onKeyDown = (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && job && edit && !saving) { e.preventDefault(); save(); } };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [job, edit, saving]);
+
+  if (!job || !edit) return null;
 
   const save = async () => {
     setSaving(true);
@@ -105,7 +105,7 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
 
           <div className="space-y-2">
             <label className="text-[11px] font-medium text-stone-500 block">Notes</label>
-            <textarea value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); save(); } }} rows={3)
+            <textarea value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); save(); } }} rows={3}
               className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400 resize-none" />
           </div>
 
@@ -130,6 +130,12 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
       </div>
     </div>
   );
+}
+
+function formatDescription(text) {
+  const lines = String(text || '').replace(/\\r/g, '').split(/\\n+/).map((line) => line.trim()).filter(Boolean);
+  const heading = /^(about|overview|responsibilities|requirements|qualifications|what you.ll do|what we offer|compensation|salary|benefits|how to apply)/i;
+  return lines.map((line, i) => heading.test(line) ? <div key={i} className="font-semibold text-stone-800 mt-2">{line}</div> : <p key={i} className={/(salary|compensation|pay|rate|benefits|hourly|per month|per year)/i.test(line) ? 'font-semibold text-emerald-700 bg-emerald-50 rounded px-2 py-1' : ''}>{line}</p>);
 }
 
 function Field({ label, children }) {

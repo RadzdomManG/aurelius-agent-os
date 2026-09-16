@@ -142,7 +142,7 @@ Return JSON with a "leads" array.`;
   };
   const addCandidates = (cands: any[]) => {
     for (const c of cands) {
-      if (!c || !c.name) continue;
+      if (!c || !c.name || !hasRequiredContacts(c)) continue;
       const d = normDomain(c.website);
       const n = normName(c.company || c.name);
       if ((d && domainIndex.get(d)) || (n && nameIndex.get(n))) {

@@ -18,8 +18,9 @@ export default function LeadComposer({ onDone }) {
     try {
       const res = await base44.functions.invoke('lead_discovery', { message: q, filters, count });
       const d = res.data || res;
+      const resultIds = (d.leads || []).map((x) => x.id).filter(Boolean);
       let localCount = 0;
-      const resultIds = [];
+      const resultIds = (d.leads || []).map((x) => x.id).filter(Boolean);
       try {
         const local = await fetch('http://127.0.0.1:5000/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Access-Code': 'AGS-DEMO-2026' }, body: JSON.stringify({ keyword: q, location: filters.location || 'United States', limit: count }) });
         if (local.ok) {

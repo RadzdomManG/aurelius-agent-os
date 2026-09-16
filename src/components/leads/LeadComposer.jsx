@@ -18,7 +18,6 @@ export default function LeadComposer({ onDone }) {
     try {
       const res = await base44.functions.invoke('lead_discovery', { message: q, filters, count });
       const d = res.data || res;
-      const resultIds = (d.leads || []).map((x) => x.id).filter(Boolean);
       let localCount = 0;
       const resultIds = (d.leads || []).map((x) => x.id).filter(Boolean);
       try {

@@ -62,7 +62,7 @@ export default function JobsPipeline({ jobs, onMove, onOpen }) {
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
-                                  <div className="text-[12.5px] font-semibold text-stone-800 truncate">{job.title}</div>
+                                  <div className="text-[12.5px] font-semibold text-stone-800 truncate">{String(job.title || '').replace(/^\[(onlinejobsph|olj)\]\s*/i, '')}</div>
                                   {job.company && <div className="text-[11px] text-stone-500 truncate">{job.company}</div>}
                                 </div>
                                 <span className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded ${scoreTone(job.match_score)} shrink-0 tabular-nums`}>{job.match_score || 0}</span>

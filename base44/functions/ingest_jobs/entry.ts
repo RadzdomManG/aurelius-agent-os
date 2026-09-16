@@ -22,6 +22,8 @@ export default async function(req: Request): Promise<Response> {
     const seenUrls = new Set(existing.map((j: any) => j.url).filter(Boolean));
     const seenKeys = new Set(existing.map((j: any) => `${(j.title || '').toLowerCase()}|${(j.company || '').toLowerCase()}`));
 
+    const normalizedJobs = incoming.slice(0, 50).map(normalize).filter((j: any) => j.title);
+    const aiMatches = await rankJobsWithAurelius(base44, profile, normalizedJobs);
     const toCreate: any[] = [];
     let duplicates = 0;
     for (const raw of incoming.slice(0, 50)) {
@@ -30,7 +32,11 @@ export default async function(req: Request): Promise<Response> {
       if (job.url && seenUrls.has(job.url)) { duplicates++; continue; }
       const key = `${job.title.toLowerCase()}|${(job.company || '').toLowerCase()}`;
       if (!job.url && seenKeys.has(key)) { duplicates++; continue; }
-      const { score, reason, matched } = scoreJob(job, keywords);
+      const fallback = scoreJob(job, keywords);
+      const ai = aiMatches[job.url || `${job.title}|${job.company}`] || fallback;
+      const score = Number(ai.score ?? fallback.score);
+      const reason = ai.reason || fallback.reason;
+      const matched = Array.isArray(ai.matched) ? ai.matched : fallback.matched;
       toCreate.push({
         title: job.title,
         company: job.company,

@@ -5,6 +5,12 @@ import JobsTable from '@/components/jobs/JobsTable';
 import JobDetailDrawer from '@/components/jobs/JobDetailDrawer';
 import { KanbanSquare, Table2, Loader2, RefreshCw, Radio } from 'lucide-react';
 
+function jobTime(job) {
+  const value = job?.posted_at_iso || job?.posted_at || job?.created_date;
+  const t = value ? Date.parse(value) : 0;
+  return Number.isNaN(t) ? 0 : t;
+}
+
 export default function Jobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +25,7 @@ export default function Jobs() {
   const load = useCallback(async () => {
     try {
       const j = await base44.entities.Job.list('-posted_at', 500);
-      setJobs(j);
+      setJobs([...j].sort((a, b) => jobTime(b) - jobTime(a)));
     } catch { /* noop */ }
     finally { setLoading(false); setRefreshing(false); }
   }, []);

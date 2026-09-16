@@ -74,7 +74,7 @@ export default function JobsPipeline({ jobs, onMove, onOpen }) {
                                     <MapPin className="w-2.5 h-2.5" /> {job.location}
                                   </span>
                                 )}
-                                {job.url && <ExternalLink className="w-3 h-3 text-stone-300 ml-auto" />}
+                                {job.url && <a href={job.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="ml-auto text-stone-300 hover:text-amber-600" title="Open original job post"><ExternalLink className="w-3 h-3" /></a>}
                               </div>
                             </div>
                           )}

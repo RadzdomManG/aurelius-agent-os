@@ -24,6 +24,7 @@ export default function Leads() {
 
   const load = useCallback(async () => {
     try {
+      if (!isCustomer && !showHistory) { setLeads([]); return; }
       if (isCustomer) {
         const res = await base44.functions.invoke('customer_data', { token, resource: 'leads' });
         setLeads((res.data || res).rows || []);
@@ -33,7 +34,7 @@ export default function Leads() {
       }
     } catch { /* noop */ }
     finally { setLoading(false); }
-  }, [isCustomer, token]);
+  }, [isCustomer, token, showHistory]);
 
   useEffect(() => {
     load();

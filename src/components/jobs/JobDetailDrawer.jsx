@@ -24,6 +24,12 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
 
   if (!job || !edit) return null;
 
+  useEffect(() => {
+    const onKeyDown = (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && job && edit && !saving) { e.preventDefault(); save(); } };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [job, edit, saving]);
+
   const save = async () => {
     setSaving(true);
     try {
@@ -86,7 +92,7 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
 
           {job.description && (
             <Field label="Description">
-              <div className={`whitespace-pre-wrap ${expandedDescription ? '' : 'max-h-48 overflow-hidden'}`}>{job.description}</div>
+              <div className={`${expandedDescription ? '' : 'max-h-48 overflow-hidden'} space-y-2`}>{formatDescription(job.description)}</div>
               {job.description.length > 700 && <button onClick={() => setExpandedDescription((v) => !v)} className="mt-2 text-[12px] font-medium text-amber-700 hover:text-amber-800">{expandedDescription ? 'See less' : 'See more'}</button>}
             </Field>
           )}
@@ -99,13 +105,13 @@ export default function JobDetailDrawer({ job, onClose, onUpdated }) {
 
           <div className="space-y-2">
             <label className="text-[11px] font-medium text-stone-500 block">Notes</label>
-            <textarea value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} rows={3}
+            <textarea value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); save(); } }} rows={3)
               className="w-full rounded-lg border border-stone-200 px-3 py-2 text-[12.5px] focus:outline-none focus:border-amber-400 resize-none" />
           </div>
 
           <button onClick={save} disabled={saving}
             className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 text-white text-[13px] font-medium disabled:opacity-60">
-            <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save changes'}
+            <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save changes'} <span className="text-[10px] opacity-60 ml-1">Ctrl+Enter</span>
           </button>
 
           <div>

@@ -88,7 +88,7 @@ export default function JobsTable({ jobs, onOpen }) {
           <tbody className="divide-y divide-stone-100">
             {filtered.map((j) => (
               <tr key={j.id} onClick={() => onOpen(j)} className="hover:bg-stone-50 cursor-pointer">
-                <td className="px-3 py-2 font-medium text-stone-800 max-w-[280px] truncate">{j.title}</td>
+                <td className="px-3 py-2 font-medium text-stone-800 max-w-[280px] truncate">{String(j.title || '').replace(/^\[(onlinejobsph|olj)\]\s*/i, '')}</td>
                 <td className="px-3 py-2 text-stone-500">{j.company || '—'}</td>
                 <td className="px-3 py-2 text-stone-500">{j.remote ? 'Remote' : (j.location || '—')}</td>
                 <td className="px-3 py-2"><span className="capitalize text-stone-500">{(j.status || 'saved').replace(/_/g, ' ')}</span></td>

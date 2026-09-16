@@ -105,6 +105,21 @@ function normalize(raw: any) {
   };
 }
 
+async function rankJobsWithAurelius(base44: any, profile: any, jobs: any[]): Promise<Record<string, any>> {
+  if (!jobs.length) return {};
+  const roster = jobs.map((j: any, i: number) => `${i}. key=${j.url || `${j.title}|${j.company}`} | ${j.title} | ${j.company} | ${j.description.slice(0, 500)}`).join('\\n');
+  try {
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: `You are Aurelius, the user's job matching brain. Rank each job 0-100 for this profile. Consider skills, services, preferred jobs, experience, remote preference, and likely fit. Return a concise reason and 3-8 matched skills.\\nPROFILE: ${JSON.stringify(profile)}\\nJOBS:\\n${roster}`,
+      response_json_schema: { type: 'object', properties: { matches: { type: 'array', items: { type: 'object', properties: { key: { type: 'string' }, score: { type: 'number' }, reason: { type: 'string' }, matched: { type: 'array', items: { type: 'string' } } }, required: ['key', 'score', 'reason', 'matched'] } } }, required: ['matches'] },
+      model: 'automatic'
+    });
+    return Object.fromEntries((result.matches || []).map((m: any) => [m.key, m]));
+  } catch (_) {
+    return {};
+  }
+}
+
 function buildKeywordSet(profile: any): string[] {
   const blobs = [...(profile.skills || []), ...(profile.services || []), profile.preferred_jobs || '', profile.title || ''];
   const set = new Set<string>();

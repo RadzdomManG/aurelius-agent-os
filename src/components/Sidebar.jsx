@@ -12,7 +12,6 @@ const nav = [
   { to: '/aurelius', label: 'Aurelius', icon: Sparkles },
   { to: '/leads', label: 'Leads', icon: Users },
   { to: '/jobs', label: 'Jobs', icon: Briefcase },
-  { to: '/inbox', label: 'Inbox', icon: Inbox },
 ];
 
 export default function Sidebar({ autonomyMode = 'manual', onOpenMobile }) {

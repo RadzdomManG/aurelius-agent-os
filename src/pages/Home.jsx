@@ -98,6 +98,12 @@ export default function Home() {
         </section>
       )}
 
+      <section className="rounded-2xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-5">
+        <h2 className="font-display text-lg font-semibold text-stone-800">Aurelius CRM for smarter lead and job workflows</h2>
+        <p className="mt-2 text-sm text-stone-500 max-w-3xl">Find qualified leads from Google Maps, track every contact, and match current job posts to your skills. Use CRM for relationship stages, Tasks for follow-ups, and Calendar for interviews and reminders.</p>
+        <div className="mt-4 grid sm:grid-cols-3 gap-3 text-[12px] text-stone-600"><div><strong className="text-stone-800">How does lead search work?</strong><br/>Enter a search, choose contact requirements, and export verified results.</div><div><strong className="text-stone-800">How are jobs matched?</strong><br/>Aurelius scores title and description against your profile keywords.</div><div><strong className="text-stone-800">Need help?</strong><br/><a className="text-amber-700 underline" href="mailto:radzdomgallego4@gmail.com">Contact Radzdomgallego4@gmail.com</a></div></div>
+      </section>
+
       {/* Dashboard grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <Panel title="Priorities" icon={ListTodo} count={data.tasks.length}>

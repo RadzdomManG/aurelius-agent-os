@@ -18,6 +18,7 @@ import Onboarding from '@/pages/Onboarding';
 import Settings from '@/pages/Settings';
 import Leads from '@/pages/Leads';
 import Jobs from '@/pages/Jobs';
+import ModulePage from '@/pages/ModulePage';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -58,6 +59,14 @@ const AuthenticatedApp = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/leads" element={<Leads />} />
           <Route path="/jobs" element={<Jobs />} />
+          <Route path="/inbox" element={<ModulePage module="inbox" />} />
+          <Route path="/crm" element={<ModulePage module="crm" />} />
+          <Route path="/tasks" element={<ModulePage module="tasks" />} />
+          <Route path="/calendar" element={<ModulePage module="calendar" />} />
+          <Route path="/memory" element={<ModulePage module="memory" />} />
+          <Route path="/approvals" element={<ModulePage module="approvals" />} />
+          <Route path="/activity" element={<ModulePage module="activity" />} />
+          <Route path="/integrations" element={<ModulePage module="integrations" />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

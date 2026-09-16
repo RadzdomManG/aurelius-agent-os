@@ -21,7 +21,7 @@ export default function LeadDetailDrawer({ lead, onClose, onUpdated }) {
     }
   }, [lead]);
 
-  if (!lead) return null;
+  if (!lead || !edit) return null;
 
   const save = async () => {
     setSaving(true);

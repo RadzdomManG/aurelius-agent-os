@@ -211,6 +211,7 @@ Return JSON with a "leads" array.`;
       decision_maker: c.decision_maker || false,
       status: 'new',
       next_action: score >= 70 ? 'Review and qualify' : 'Review',
+      contact_note: contactStatus(c).note,
     });
     created.push(lead);
     if (score >= 80) highQuality++;

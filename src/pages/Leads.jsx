@@ -89,7 +89,7 @@ export default function Leads() {
         <div>
           <h1 className="font-display text-xl font-semibold text-stone-800">Leads</h1>
           <p className="text-[13px] text-stone-400">
-            {leads.length > 0
+            {searchRunning ? 'Lead search is still running in the background…' : leads.length > 0
               ? `${leads.length} prospects · scored by Aurelius`
               : hasSearched ? 'No prospects found yet — try widening your location' : 'Run a search to load leads'}
           </p>

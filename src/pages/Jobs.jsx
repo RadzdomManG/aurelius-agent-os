@@ -39,9 +39,15 @@ export default function Jobs() {
   const load = useCallback(async () => {
     try {
       if (readOnly) {
-        const res = await base44.functions.invoke('customer_data', { token, resource: 'jobs' });
-        const j = (res.data || res).rows || [];
-        setJobs(uniqueJobs(j).sort((a, b) => jobTime(b) - jobTime(a)));
+        const pages = [];
+        const pageSize = 100;
+        for (let skip = 0; ; skip += pageSize) {
+          const res = await base44.functions.invoke('customer_data', { token, resource: 'jobs', skip, limit: pageSize });
+          const page = (res.data || res).rows || [];
+          pages.push(...page);
+          if (page.length < pageSize) break;
+        }
+        setJobs(uniqueJobs(pages).sort((a, b) => jobTime(b) - jobTime(a)));
       } else {
         const pages = [];
         const pageSize = 100;

@@ -24,7 +24,12 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ rows });
     }
     if (resource === 'jobs') {
-      const rows = await svc.Job.list('-created_date', 500);
+      const rows: any[] = [];
+      for (let skip = 0; ; skip += 500) {
+        const page = await svc.Job.list('-posted_at', 500, skip);
+        rows.push(...(page || []));
+        if (!page || page.length < 500) break;
+      }
       return Response.json({ rows });
     }
     return Response.json({ error: 'Unknown resource.' }, { status: 400 });

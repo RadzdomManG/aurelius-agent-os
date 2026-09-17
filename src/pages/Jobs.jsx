@@ -34,10 +34,11 @@ export default function Jobs() {
         setJobs([...j].sort((a, b) => jobTime(b) - jobTime(a)));
       } else {
         const pages = [];
-        for (let skip = 0; ; skip += 500) {
-          const page = await base44.entities.Job.list('-posted_at', 500, skip);
+        const pageSize = 100;
+        for (let skip = 0; ; skip += pageSize) {
+          const page = await base44.entities.Job.list('-posted_at', pageSize, skip);
           pages.push(...(page || []));
-          if (!page || page.length < 500) break;
+          if (!page || page.length < pageSize) break;
         }
         setJobs(pages.sort((a, b) => jobTime(b) - jobTime(a)));
       }

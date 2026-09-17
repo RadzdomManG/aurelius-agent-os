@@ -13,10 +13,14 @@ export default async function(req: Request): Promise<Response> {
     if (!incoming.length) return Response.json({ error: 'No jobs provided' }, { status: 400 });
 
     // Load the operator profile + existing jobs (dedup by url)
-    const [profiles, existing] = await Promise.all([
-      base44.asServiceRole.entities.UserProfile.filter({}),
-      base44.asServiceRole.entities.Job.list('-created_date', 500),
-    ]);
+    const profiles = await base44.asServiceRole.entities.UserProfile.filter({});
+    const existing: any[] = [];
+    const pageSize = 100;
+    for (let skip = 0; ; skip += pageSize) {
+      const page = await base44.asServiceRole.entities.Job.list('-created_date', pageSize, skip);
+      existing.push(...(page || []));
+      if (!page || page.length < pageSize) break;
+    }
     const profile = profiles[0] || {};
     const keywords = buildKeywordSet(profile);
     const seenUrls = new Set(existing.map((j: any) => j.url).filter(Boolean));

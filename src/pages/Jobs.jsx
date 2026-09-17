@@ -12,6 +12,16 @@ function jobTime(job) {
   return Number.isNaN(t) ? 0 : t;
 }
 
+function uniqueJobs(rows) {
+  const seen = new Set();
+  return rows.filter((job) => {
+    const key = job?.url || `${String(job?.title || '').trim().toLowerCase()}|${String(job?.company || '').trim().toLowerCase()}`;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export default function Jobs() {
   const { mode, token } = usePortal();
   const readOnly = mode === 'customer';
@@ -31,7 +41,7 @@ export default function Jobs() {
       if (readOnly) {
         const res = await base44.functions.invoke('customer_data', { token, resource: 'jobs' });
         const j = (res.data || res).rows || [];
-        setJobs([...j].sort((a, b) => jobTime(b) - jobTime(a)));
+        setJobs(uniqueJobs(j).sort((a, b) => jobTime(b) - jobTime(a)));
       } else {
         const pages = [];
         const pageSize = 100;
@@ -40,7 +50,7 @@ export default function Jobs() {
           pages.push(...(page || []));
           if (!page || page.length < pageSize) break;
         }
-        setJobs(pages.sort((a, b) => jobTime(b) - jobTime(a)));
+        setJobs(uniqueJobs(pages).sort((a, b) => jobTime(b) - jobTime(a)));
       }
     } catch { /* noop */ }
     finally { setLoading(false); setRefreshing(false); }

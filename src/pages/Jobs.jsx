@@ -33,8 +33,13 @@ export default function Jobs() {
         const j = (res.data || res).rows || [];
         setJobs([...j].sort((a, b) => jobTime(b) - jobTime(a)));
       } else {
-        const j = await base44.entities.Job.list('-posted_at', 500);
-        setJobs([...j].sort((a, b) => jobTime(b) - jobTime(a)));
+        const pages = [];
+        for (let skip = 0; ; skip += 500) {
+          const page = await base44.entities.Job.list('-posted_at', 500, skip);
+          pages.push(...(page || []));
+          if (!page || page.length < 500) break;
+        }
+        setJobs(pages.sort((a, b) => jobTime(b) - jobTime(a)));
       }
     } catch { /* noop */ }
     finally { setLoading(false); setRefreshing(false); }

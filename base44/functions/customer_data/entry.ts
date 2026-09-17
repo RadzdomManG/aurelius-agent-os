@@ -13,6 +13,8 @@ export default async function (req: Request): Promise<Response> {
     const body = await req.json().catch(() => ({}));
     const token = (body.token || '').toString();
     const resource = (body.resource || '').toString();
+    const skip = Math.max(Number(body.skip) || 0, 0);
+    const limit = Math.min(Math.max(Number(body.limit) || 100, 1), 500);
     if (!resource) return Response.json({ error: 'Missing resource.' }, { status: 400 });
 
     const auth = await validateCustomerSession(base44, token);

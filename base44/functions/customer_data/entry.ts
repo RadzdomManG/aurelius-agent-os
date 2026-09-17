@@ -25,10 +25,11 @@ export default async function (req: Request): Promise<Response> {
     }
     if (resource === 'jobs') {
       const rows: any[] = [];
-      for (let skip = 0; ; skip += 500) {
-        const page = await svc.Job.list('-posted_at', 500, skip);
+      const pageSize = 100;
+      for (let skip = 0; ; skip += pageSize) {
+        const page = await svc.Job.list('-posted_at', pageSize, skip);
         rows.push(...(page || []));
-        if (!page || page.length < 500) break;
+        if (!page || page.length < pageSize) break;
       }
       return Response.json({ rows });
     }

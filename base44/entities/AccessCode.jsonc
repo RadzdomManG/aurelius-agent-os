@@ -17,7 +17,12 @@
     "expires_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When the code stops being valid (optional)"
+      "description": "Set automatically 24 hours after first redemption"
+    },
+    "activated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this code was first redeemed"
     },
     "max_uses": {
       "type": "number",

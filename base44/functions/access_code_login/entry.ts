@@ -35,7 +35,7 @@ export default async function(req: Request): Promise<Response> {
     }
 
     const token = generateToken();
-    const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
+    const expiresAt = codeExpiresAt.toISOString();
     const session = await base44.asServiceRole.entities.AccessSession.create({
       token,
       code_id: accessCode.id,

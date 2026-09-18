@@ -17,7 +17,16 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ error: 'This access code is invalid or has been revoked.' }, { status: 403 });
     }
 
-    if (accessCode.expires_at && new Date(accessCode.expires_at) <= new Date()) {
+    const now = new Date();
+    let codeExpiresAt = accessCode.expires_at ? new Date(accessCode.expires_at) : null;
+    if (!codeExpiresAt) {
+      codeExpiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      await base44.asServiceRole.entities.AccessCode.update(accessCode.id, {
+        activated_at: now.toISOString(),
+        expires_at: codeExpiresAt.toISOString(),
+      });
+    }
+    if (codeExpiresAt <= now) {
       return Response.json({ error: 'This access code has expired.' }, { status: 403 });
     }
 
